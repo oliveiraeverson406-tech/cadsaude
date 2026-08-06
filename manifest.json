@@ -1,0 +1,24 @@
+{
+  "name": "Cadastro de Pessoas - CadSaúde",
+  "short_name": "CadSaúde",
+  "description": "Cadastro de nome, sexo, data de nascimento, CPF e condições de saúde",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f7f2",
+  "theme_color": "#204a37",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro de Pessoas</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#204a37">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CadSaúde">
+<style>
+  :root{
+    --ink:#1c2b28;
+    --paper:#f4f7f2;
+    --line:#d7ded1;
+    --accent:#2f6b4f;
+    --accent-dark:#204a37;
+    --danger:#a13e2f;
+    --muted:#5c6b64;
+    --card:#ffffff;
+    --warn:#b5730a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Roboto, -apple-system, sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    padding-bottom:60px;
+  }
+  header{
+    background:var(--accent-dark);
+    color:#fff;
+    padding:22px 18px 26px;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  header h1{
+    margin:0 0 4px;
+    font-size:1.3rem;
+    letter-spacing:0.3px;
+  }
+  header p{
+    margin:0;
+    font-size:0.85rem;
+    color:#cfe0d5;
+  }
+  main{
+    max-width:640px;
+    margin:0 auto;
+    padding:16px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:16px;
+    margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h2{
+    font-size:1rem;
+    margin:0 0 12px;
+    color:var(--accent-dark);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  label{
+    display:block;
+    font-size:0.78rem;
+    color:var(--muted);
+    margin-bottom:4px;
+    margin-top:10px;
+    font-weight:600;
+  }
+  label:first-of-type{margin-top:0;}
+  input, select{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:7px;
+    font-size:0.95rem;
+    background:#fbfcfa;
+    color:var(--ink);
+  }
+  input:focus, select:focus{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+    background:#fff;
+  }
+  .error-msg{
+    font-size:0.75rem;
+    color:var(--danger);
+    margin-top:4px;
+    min-height:14px;
+  }
+  .btn-row{
+    display:flex;
+    gap:10px;
+    margin-top:16px;
+  }
+  button{
+    border:none;
+    border-radius:7px;
+    padding:11px 16px;
+    font-size:0.9rem;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .btn-primary{
+    background:var(--accent);
+    color:#fff;
+    flex:1;
+  }
+  .btn-primary:hover{background:var(--accent-dark);}
+  .btn-secondary{
+    background:#eceee7;
+    color:var(--ink);
+  }
+  .btn-secondary:hover{background:#dfe3d9;}
+  .search-box{
+    position:relative;
+    margin-bottom:12px;
+  }
+  .search-box input{
+    width:100%;
+    padding-left:38px;
+  }
+  .search-box svg{
+    position:absolute;
+    left:12px;
+    top:50%;
+    transform:translateY(-50%);
+    width:18px;
+    height:18px;
+    stroke:var(--muted);
+    pointer-events:none;
+  }
+  .count-badge{
+    font-size:0.78rem;
+    color:var(--muted);
+    font-weight:normal;
+  }
+  .person{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    background:#fbfcfa;
+  }
+  .person-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .person-name{
+    font-weight:700;
+    font-size:0.98rem;
+  }
+  .person-details{
+    font-size:0.82rem;
+    color:var(--muted);
+    margin-top:4px;
+    line-height:1.5;
+  }
+  .tag{
+    display:inline-block;
+    background:#e3ece5;
+    color:var(--accent-dark);
+    font-size:0.7rem;
+    font-weight:700;
+    padding:2px 7px;
+    border-radius:20px;
+    margin-right:6px;
+    margin-bottom:4px;
+  }
+  .tag.age{background:#dde7f0; color:#2a4d6b;}
+  .tag.condition{background:#f6e4d9; color:var(--warn);}
+  .actions{
+    display:flex;
+    gap:6px;
+    flex-shrink:0;
+  }
+  .icon-btn{
+    background:none;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:6px 9px;
+    font-size:0.8rem;
+    color:var(--muted);
+  }
+  .icon-btn.edit:hover{border-color:var(--accent);color:var(--accent-dark);}
+  .icon-btn.del:hover{border-color:var(--danger);color:var(--danger);}
+  .empty-state{
+    text-align:center;
+    color:var(--muted);
+    padding:30px 10px;
+    font-size:0.88rem;
+  }
+  .toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+  }
+  .small-link{
+    background:none;
+    border:none;
+    color:var(--accent-dark);
+    font-size:0.78rem;
+    text-decoration:underline;
+    padding:0;
+    cursor:pointer;
+  }
+  .toast{
+    position:fixed;
+    bottom:18px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--accent-dark);
+    color:#fff;
+    padding:10px 18px;
+    border-radius:8px;
+    font-size:0.85rem;
+    opacity:0;
+    transition:all 0.25s ease;
+    pointer-events:none;
+    z-index:50;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+  .loading{
+    text-align:center;
+    padding:30px;
+    color:var(--muted);
+    font-size:0.85rem;
+  }
+  fieldset{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px 12px;
+    margin-top:12px;
+  }
+  legend{
+    font-size:0.78rem;
+    color:var(--muted);
+    font-weight:600;
+    padding:0 4px;
+  }
+  .check-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px 12px;
+  }
+  .check-item{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:0.86rem;
+  }
+  .check-item input{
+    width:auto;
+    accent-color:var(--accent);
+  }
+  .backup-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .backup-row button{flex:1;min-width:130px;}
+  .backup-note{
+    font-size:0.76rem;
+    color:var(--muted);
+    margin-top:8px;
+    line-height:1.5;
+  }
+  #import-file{display:none;}
+  .age-note{
+    font-size:0.76rem;
+    color:var(--muted);
+    margin-top:4px;
+  }
+  .storage-note{
+    font-size:0.76rem;
+    color:var(--muted);
+    background:#f6efe0;
+    border:1px solid #e6d6ab;
+    border-radius:8px;
+    padding:8px 10px;
+    margin-bottom:12px;
+    line-height:1.5;
+  }
+  .date-grid{
+    display:grid;
+    grid-template-columns:1fr 1.4fr 1.2fr;
+    gap:8px;
+  }
+  .date-grid select{
+    padding:10px 6px;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Cadastro de Pessoas</h1>
+  <p>Nome, sexo, data de nascimento, CPF e condições de saúde</p>
+</header>
+
+<main>
+
+  <div class="card">
+    <h2>Backup dos dados</h2>
+    <div class="backup-row">
+      <button type="button" class="btn-secondary" id="backup-json-btn">Salvar backup (.json)</button>
+      <button type="button" class="btn-secondary" id="restore-btn">Restaurar backup</button>
+      <button type="button" class="btn-secondary" id="export-btn">Exportar CSV</button>
+    </div>
+    <input type="file" id="import-file" accept="application/json">
+    <div class="backup-note">O backup (.json) salva tudo e pode ser restaurado depois. Faça isso periodicamente para não depender só do armazenamento do app.</div>
+  </div>
+
+  <div class="card">
+    <h2 id="form-title">Nova pessoa</h2>
+    <div class="storage-note">⚠️ Os dados ficam salvos apenas neste navegador/aparelho. Se limpar o cache, trocar de celular ou usar outro navegador, os cadastros somem. Use o backup (.json) sempre que cadastrar gente nova.</div>
+    <form id="person-form">
+      <label for="nome">Nome completo</label>
+      <input type="text" id="nome" autocomplete="off" required>
+      <div class="error-msg" id="err-nome"></div>
+
+      <label for="sexo">Sexo</label>
+      <select id="sexo" required>
+        <option value="">Selecione</option>
+        <option value="Feminino">Feminino</option>
+        <option value="Masculino">Masculino</option>
+      </select>
+      <div class="error-msg" id="err-sexo"></div>
+
+      <label for="dia-nasc">Data de nascimento</label>
+      <div class="date-grid">
+        <select id="dia-nasc" aria-label="Dia" required>
+          <option value="">Dia</option>
+        </select>
+        <select id="mes-nasc" aria-label="Mês" required>
+          <option value="">Mês</option>
+        </select>
+        <select id="ano-nasc" aria-label="Ano" required>
+          <option value="">Ano</option>
+        </select>
+      </div>
+      <div class="error-msg" id="err-nascimento"></div>
+      <div class="age-note" id="age-preview"></div>
+
+      <label for="cpf">CPF</label>
+      <input type="text" id="cpf" inputmode="numeric" placeholder="000.000.000-00" maxlength="14">
+      <div class="error-msg" id="err-cpf"></div>
+
+      <fieldset>
+        <legend>Condições de saúde</legend>
+        <div class="check-grid">
+          <label class="check-item"><input type="checkbox" value="Diabetes" class="cond-check"> Diabetes</label>
+          <label class="check-item"><input type="checkbox" value="Hipertensão" class="cond-check"> Hipertensão</label>
+          <label class="check-item"><input type="checkbox" value="Deficiência visual" class="cond-check"> Deficiência visual</label>
+          <label class="check-item"><input type="checkbox" value="Acamado" class="cond-check"> Acamado</label>
+          <label class="check-item"><input type="checkbox" value="Paraplégico" class="cond-check"> Paraplégico</label>
+          <label class="check-item"><input type="checkbox" value="Uso de medicamento controlado" class="cond-check"> Uso de medicamento controlado</label>
+        </div>
+      </fieldset>
+
+      <div class="btn-row">
+        <button type="submit" class="btn-primary" id="submit-btn">Salvar</button>
+        <button type="button" class="btn-secondary" id="cancel-edit" style="display:none;">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <h2 style="margin:0;">Pessoas cadastradas <span class="count-badge" id="count-badge"></span></h2>
+    </div>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="search" placeholder="Buscar por nome ou CPF...">
+    </div>
+    <div id="list-container">
+      <div class="loading">Carregando...</div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let people = [];
+let editingId = null;
+
+const form = document.getElementById('person-form');
+const nomeInput = document.getElementById('nome');
+const sexoInput = document.getElementById('sexo');
+const diaInput = document.getElementById('dia-nasc');
+const mesInput = document.getElementById('mes-nasc');
+const anoInput = document.getElementById('ano-nasc');
+const cpfInput = document.getElementById('cpf');
+const listContainer = document.getElementById('list-container');
+const countBadge = document.getElementById('count-badge');
+const searchInput = document.getElementById('search');
+const cancelEditBtn = document.getElementById('cancel-edit');
+const submitBtn = document.getElementById('submit-btn');
+const formTitle = document.getElementById('form-title');
+const toast = document.getElementById('toast');
+const exportBtn = document.getElementById('export-btn');
+const backupJsonBtn = document.getElementById('backup-json-btn');
+const restoreBtn = document.getElementById('restore-btn');
+const importFile = document.getElementById('import-file');
+const agePreview = document.getElementById('age-preview');
+
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(()=> toast.classList.remove('show'), 2400);
+}
+
+function clearErrors(){
+  document.querySelectorAll('.error-msg').forEach(e => e.textContent = '');
+}
+
+function maskCPF(value){
+  let v = value.replace(/\D/g,'').slice(0,11);
+  if(v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+  else if(v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+  else if(v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+  return v;
+}
+
+cpfInput.addEventListener('input', (e) => {
+  e.target.value = maskCPF(e.target.value);
+});
+
+function isValidCPF(cpf){
+  const digits = cpf.replace(/\D/g,'');
+  if(digits.length === 0) return true;
+  if(digits.length !== 11) return false;
+  if(/^(\d)\1{10}$/.test(digits)) return false;
+  let sum = 0;
+  for(let i=0;i<9;i++) sum += parseInt(digits[i]) * (10-i);
+  let d1 = (sum*10) % 11;
+  if(d1 === 10) d1 = 0;
+  if(d1 !== parseInt(digits[9])) return false;
+  sum = 0;
+  for(let i=0;i<10;i++) sum += parseInt(digits[i]) * (11-i);
+  let d2 = (sum*10) % 11;
+  if(d2 === 10) d2 = 0;
+  if(d2 !== parseInt(digits[10])) return false;
+  return true;
+}
+
+function formatDateBR(iso){
+  if(!iso) return '';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function calcAge(iso){
+  if(!iso) return null;
+  const birth = new Date(iso + 'T00:00:00');
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if(m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+function ageGroup(iso){
+  const age = calcAge(iso);
+  if(age === null) return '';
+  if(age < 12) return 'Criança';
+  if(age < 60) return 'Adulto';
+  return 'Idoso';
+}
+
+const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+function populateDateSelects(){
+  for(let d = 1; d <= 31; d++){
+    const opt = document.createElement('option');
+    opt.value = String(d).padStart(2,'0');
+    opt.textContent = d;
+    diaInput.appendChild(opt);
+  }
+  MESES.forEach((nome, idx) => {
+    const opt = document.createElement('option');
+    opt.value = String(idx+1).padStart(2,'0');
+    opt.textContent = nome;
+    mesInput.appendChild(opt);
+  });
+  const currentYear = new Date().getFullYear();
+  for(let y = currentYear; y >= currentYear - 120; y--){
+    const opt = document.createElement('option');
+    opt.value = String(y);
+    opt.textContent = y;
+    anoInput.appendChild(opt);
+  }
+}
+populateDateSelects();
+
+function getNascimentoISO(){
+  if(!diaInput.value || !mesInput.value || !anoInput.value) return '';
+  return `${anoInput.value}-${mesInput.value}-${diaInput.value}`;
+}
+
+function setNascimentoFromISO(iso){
+  if(!iso){
+    diaInput.value = '';
+    mesInput.value = '';
+    anoInput.value = '';
+    return;
+  }
+  const [y,m,d] = iso.split('-');
+  anoInput.value = y;
+  mesInput.value = m;
+  diaInput.value = d;
+}
+
+function updateAgePreview(){
+  const iso = getNascimentoISO();
+  if(!iso){ agePreview.textContent = ''; return; }
+  const age = calcAge(iso);
+  agePreview.textContent = age !== null && age >= 0 ? `${age} anos · ${ageGroup(iso)}` : 'Data inválida';
+}
+
+[diaInput, mesInput, anoInput].forEach(sel => sel.addEventListener('change', updateAgePreview));
+
+const STORAGE_KEY = 'cadsaude-people-list';
+
+async function loadPeople(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    people = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    people = [];
+  }
+  render();
+}
+
+async function savePeople(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(people));
+    return true;
+  }catch(e){
+    showToast('Erro ao salvar. O armazenamento do navegador pode estar cheio ou bloqueado.');
+    return false;
+  }
+}
+
+function normalize(str){
+  return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+}
+
+function render(){
+  const rawTerm = searchInput.value.trim();
+  const term = normalize(rawTerm);
+  const termDigits = rawTerm.replace(/\D/g,'');
+  const filtered = people.filter(p => {
+    if(!rawTerm) return true;
+    const nomeMatch = normalize(p.nome).includes(term);
+    const cpfMatch = termDigits && p.cpf && p.cpf.replace(/\D/g,'').includes(termDigits);
+    return nomeMatch || cpfMatch;
+  }).sort((a,b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+
+  countBadge.textContent = `(${people.length})`;
+
+  if(filtered.length === 0){
+    listContainer.innerHTML = `<div class="empty-state">${people.length === 0 ? 'Nenhuma pessoa cadastrada ainda.' : 'Nenhum resultado para essa busca.'}</div>`;
+    return;
+  }
+
+  listContainer.innerHTML = filtered.map(p => {
+    const condTags = (p.condicoes || []).map(c => `<span class="tag condition">${escapeHtml(c)}</span>`).join('');
+    return `
+    <div class="person">
+      <div class="person-top">
+        <div>
+          <div class="person-name">${escapeHtml(p.nome)}</div>
+          <div class="person-details">
+            <span class="tag">${p.sexo}</span>
+            <span class="tag age">${ageGroup(p.nascimento)}</span>
+            Nasc.: ${formatDateBR(p.nascimento)}${p.cpf ? ' · CPF: ' + p.cpf : ''}
+          </div>
+          <div class="person-details">${condTags}</div>
+        </div>
+        <div class="actions">
+          <button class="icon-btn edit" onclick="startEdit('${p.id}')">Editar</button>
+          <button class="icon-btn del" onclick="deletePerson('${p.id}')">Excluir</button>
+        </div>
+      </div>
+    </div>
+  `;
+  }).join('');
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+window.startEdit = function(id){
+  const p = people.find(x => x.id === id);
+  if(!p) return;
+  editingId = id;
+  nomeInput.value = p.nome;
+  sexoInput.value = p.sexo;
+  setNascimentoFromISO(p.nascimento);
+  cpfInput.value = p.cpf || '';
+  document.querySelectorAll('.cond-check').forEach(chk => {
+    chk.checked = (p.condicoes || []).includes(chk.value);
+  });
+  const age = calcAge(p.nascimento);
+  agePreview.textContent = age !== null ? `${age} anos · ${ageGroup(p.nascimento)}` : '';
+  formTitle.textContent = 'Editar pessoa';
+  submitBtn.textContent = 'Atualizar';
+  cancelEditBtn.style.display = 'inline-block';
+  clearErrors();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+window.deletePerson = async function(id){
+  const p = people.find(x => x.id === id);
+  if(!p) return;
+  if(!confirm(`Excluir o cadastro de ${p.nome}?`)) return;
+  people = people.filter(x => x.id !== id);
+  const ok = await savePeople();
+  if(ok){
+    render();
+    showToast('Cadastro excluído.');
+  }
+}
+
+cancelEditBtn.addEventListener('click', () => {
+  resetForm();
+});
+
+function resetForm(){
+  editingId = null;
+  form.reset();
+  agePreview.textContent = '';
+  formTitle.textContent = 'Nova pessoa';
+  submitBtn.textContent = 'Salvar';
+  cancelEditBtn.style.display = 'none';
+  clearErrors();
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearErrors();
+
+  let valid = true;
+  const nome = nomeInput.value.trim();
+  const sexo = sexoInput.value;
+  const nascimento = getNascimentoISO();
+  const cpf = cpfInput.value.trim();
+  const condicoes = Array.from(document.querySelectorAll('.cond-check:checked')).map(c => c.value);
+
+  if(!nome){
+    document.getElementById('err-nome').textContent = 'Informe o nome.';
+    valid = false;
+  }
+  if(!sexo){
+    document.getElementById('err-sexo').textContent = 'Selecione o sexo.';
+    valid = false;
+  }
+  if(!nascimento){
+    document.getElementById('err-nascimento').textContent = 'Informe a data de nascimento.';
+    valid = false;
+  } else {
+    const [y,m,d] = nascimento.split('-').map(Number);
+    const test = new Date(y, m-1, d);
+    if(test.getFullYear() !== y || test.getMonth() !== m-1 || test.getDate() !== d){
+      document.getElementById('err-nascimento').textContent = 'Essa data não existe.';
+      valid = false;
+    }
+  }
+  if(cpf && !isValidCPF(cpf)){
+    document.getElementById('err-cpf').textContent = 'CPF inválido.';
+    valid = false;
+  }
+  if(cpf){
+    const digits = cpf.replace(/\D/g,'');
+    const dup = people.find(p => p.cpf && p.cpf.replace(/\D/g,'') === digits && p.id !== editingId);
+    if(dup){
+      document.getElementById('err-cpf').textContent = 'Já existe uma pessoa cadastrada com esse CPF.';
+      valid = false;
+    }
+  }
+
+  if(!valid) return;
+
+  submitBtn.disabled = true;
+
+  if(editingId){
+    const idx = people.findIndex(p => p.id === editingId);
+    if(idx !== -1){
+      people[idx] = { ...people[idx], nome, sexo, nascimento, cpf, condicoes };
+    }
+  } else {
+    people.push({
+      id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+      nome, sexo, nascimento, cpf, condicoes
+    });
+  }
+
+  const ok = await savePeople();
+  submitBtn.disabled = false;
+  if(ok){
+    render();
+    showToast(editingId ? 'Cadastro atualizado.' : 'Pessoa cadastrada.');
+    resetForm();
+  }
+});
+
+searchInput.addEventListener('input', render);
+
+exportBtn.addEventListener('click', () => {
+  if(people.length === 0){
+    showToast('Nada para exportar.');
+    return;
+  }
+  const rows = [['Nome','Sexo','Idade','Faixa etária','Data de nascimento','CPF','Condições de saúde']];
+  people.slice().sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).forEach(p => {
+    rows.push([
+      p.nome, p.sexo, String(calcAge(p.nascimento) ?? ''), ageGroup(p.nascimento),
+      formatDateBR(p.nascimento), p.cpf || '', (p.condicoes || []).join(', ')
+    ]);
+  });
+  const csv = rows.map(r => r.map(v => `"${(v||'').replace(/"/g,'""')}"`).join(';')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'cadastro-pessoas.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+backupJsonBtn.addEventListener('click', () => {
+  if(people.length === 0){
+    showToast('Nada para salvar em backup.');
+    return;
+  }
+  const payload = {
+    tipo: 'backup-cadastro-pessoas',
+    geradoEm: new Date().toISOString(),
+    pessoas: people
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dataStr = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `backup-cadastro-pessoas-${dataStr}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Backup salvo.');
+});
+
+restoreBtn.addEventListener('click', () => {
+  importFile.click();
+});
+
+importFile.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const data = JSON.parse(text);
+    const incoming = Array.isArray(data) ? data : data.pessoas;
+    if(!Array.isArray(incoming)) throw new Error('formato inválido');
+
+    const merge = confirm('Toque OK para MESCLAR com os dados atuais, ou Cancelar para SUBSTITUIR tudo pelo backup.');
+    if(merge){
+      const existingIds = new Set(people.map(p => p.id));
+      const existingCpfs = new Set(people.filter(p=>p.cpf).map(p => p.cpf.replace(/\D/g,'')));
+      let added = 0;
+      incoming.forEach(p => {
+        const cpfDigits = p.cpf ? p.cpf.replace(/\D/g,'') : '';
+        if(existingIds.has(p.id)) return;
+        if(cpfDigits && existingCpfs.has(cpfDigits)) return;
+        people.push(p);
+        added++;
+      });
+      showToast(`${added} cadastro(s) adicionados do backup.`);
+    } else {
+      people = incoming;
+      showToast('Dados substituídos pelo backup.');
+    }
+    await savePeople();
+    render();
+  }catch(err){
+    showToast('Não foi possível ler esse arquivo de backup.');
+  }
+  importFile.value = '';
+});
+
+loadPeople();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
