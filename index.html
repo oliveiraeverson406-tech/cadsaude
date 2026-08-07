@@ -24,12 +24,20 @@
     --warn:#b5730a;
   }
   *{box-sizing:border-box;}
+  html{
+    overflow-x:hidden;
+    width:100%;
+  }
   body{
     margin:0;
     font-family:'Segoe UI', Roboto, -apple-system, sans-serif;
     background:var(--paper);
     color:var(--ink);
     padding-bottom:60px;
+    overflow-x:hidden;
+    max-width:100vw;
+    overflow-wrap:break-word;
+    word-break:break-word;
   }
   header{
     background:var(--accent-dark);
@@ -162,6 +170,10 @@
     justify-content:space-between;
     align-items:flex-start;
     gap:10px;
+  }
+  .person-info{
+    min-width:0;
+    flex:1;
   }
   .person-name{
     font-weight:700;
@@ -308,6 +320,10 @@
     font-size:2rem;
     line-height:1;
     flex-shrink:0;
+  }
+  .banner-text{
+    min-width:0;
+    flex:1;
   }
   .banner-title{
     font-weight:700;
@@ -1122,7 +1138,7 @@ function render(){
     return `
     <div class="${cardClass}">
       <div class="person-top">
-        <div>
+        <div class="person-info">
           <div class="person-name">${escapeHtml(p.nome)}${alertBadge}</div>
           <div class="person-details">
             <span class="tag">${p.sexo}</span>
@@ -1401,10 +1417,31 @@ const avisoSubmitBtn = document.getElementById('aviso-submit-btn');
 const avisoCancelEditBtn = document.getElementById('aviso-cancel-edit');
 const avisoListEl = document.getElementById('aviso-list');
 
+const AVISOS_EXEMPLO = [
+  {
+    id: 'a_exemplo_1',
+    icone: '💉',
+    titulo: 'Exemplo: Campanha de Vacinação',
+    mensagem: 'Este é um aviso de exemplo. Toca em "Gerenciar" pra editar ou excluir e colocar as campanhas reais da sua unidade.'
+  },
+  {
+    id: 'a_exemplo_2',
+    icone: '🦟',
+    titulo: 'Exemplo: Combate à Dengue',
+    mensagem: 'Outro exemplo de aviso. Você pode ter quantos quiser — eles trocam sozinhos a cada 30 minutos.'
+  }
+];
+
 function loadAvisos(){
   try{
     const raw = localStorage.getItem(AVISOS_KEY);
-    avisos = raw ? JSON.parse(raw) : [];
+    if(raw === null){
+      // primeira vez usando o app: mostra avisos de exemplo pra ilustrar o recurso
+      avisos = AVISOS_EXEMPLO;
+      localStorage.setItem(AVISOS_KEY, JSON.stringify(avisos));
+    } else {
+      avisos = JSON.parse(raw);
+    }
   }catch(e){
     avisos = [];
   }
@@ -1430,7 +1467,7 @@ function renderBanner(){
   const a = avisos[currentSlideIndex];
   bannerSlide.innerHTML = `
     <div class="banner-icon">${escapeHtml(a.icone || '📢')}</div>
-    <div>
+    <div class="banner-text">
       <div class="banner-title">${escapeHtml(a.titulo)}</div>
       <div class="banner-excerpt">${escapeHtml(a.mensagem)}</div>
     </div>
