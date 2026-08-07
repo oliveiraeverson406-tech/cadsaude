@@ -288,6 +288,85 @@
     color:var(--muted);
     margin-top:4px;
   }
+  .vaccine-note{
+    font-size:0.74rem;
+    color:var(--muted);
+    margin-bottom:10px;
+    line-height:1.4;
+  }
+  .vaccine-empty{
+    font-size:0.82rem;
+    color:var(--muted);
+    margin:0;
+  }
+  .vaccine-item{
+    margin-bottom:10px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--line);
+  }
+  .vaccine-item:last-child{
+    border-bottom:none;
+    margin-bottom:0;
+    padding-bottom:0;
+  }
+  .vaccine-item-name{
+    font-size:0.86rem;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .vaccine-doses{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .dose-check{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    font-size:0.76rem;
+    background:#eef2ec;
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:4px 10px;
+  }
+  .dose-check input{
+    width:auto;
+    accent-color:var(--accent);
+  }
+  .vaccine-summary{
+    font-size:0.78rem;
+    font-weight:700;
+    margin-top:2px;
+  }
+  .vaccine-summary.complete{color:var(--accent-dark);}
+  .vaccine-summary.incomplete{color:var(--danger);}
+  .vaccine-missing{
+    font-size:0.76rem;
+    color:var(--danger);
+    font-weight:600;
+    margin-top:2px;
+    background:#fbe9e6;
+    border:1px solid #eab6ac;
+    border-radius:6px;
+    padding:4px 8px;
+    display:inline-block;
+  }
+  .alert-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    background:var(--danger);
+    color:#fff;
+    font-size:0.7rem;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:20px;
+    margin-left:6px;
+  }
+  .person.has-alert{
+    border-color:var(--danger);
+    background:#fff8f7;
+  }
   .storage-note{
     font-size:0.76rem;
     color:var(--muted);
@@ -374,6 +453,12 @@
           <label class="check-item"><input type="checkbox" value="Paraplégico" class="cond-check"> Paraplégico</label>
           <label class="check-item"><input type="checkbox" value="Uso de medicamento controlado" class="cond-check"> Uso de medicamento controlado</label>
         </div>
+      </fieldset>
+
+      <fieldset id="vaccine-fieldset">
+        <legend>Vacinas</legend>
+        <div class="vaccine-note">Marque as doses que a pessoa já tomou, olhando a carteira de vacinas. As vacinas mudam conforme a idade.</div>
+        <div id="vaccine-list"><p class="vaccine-empty">Preencha a data de nascimento para ver as vacinas dessa faixa etária.</p></div>
       </fieldset>
 
       <div class="btn-row">
@@ -490,222 +575,113 @@ function ageGroup(iso){
   return 'Idoso';
 }
 
-const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+// Cronograma simplificado com base no Calendário Nacional de Vacinação (Ministério da Saúde/PNI).
+// É uma visão geral organizacional — não substitui avaliação da equipe de saúde em casos de dúvida.
+const VACCINE_SCHEDULE = {
+  'Criança': [
+    {key:'bcg', label:'BCG', doses:1},
+    {key:'hepb', label:'Hepatite B', doses:1},
+    {key:'penta', label:'Penta (DTP + Hib + Hepatite B)', doses:3},
+    {key:'vip', label:'Poliomielite (VIP), com reforços', doses:5},
+    {key:'pneumo10', label:'Pneumocócica 10-valente', doses:3},
+    {key:'rota', label:'Rotavírus', doses:2},
+    {key:'menc', label:'Meningocócica C', doses:2},
+    {key:'menacwy', label:'Meningocócica ACWY', doses:1},
+    {key:'triplice', label:'Tríplice viral (SCR)', doses:2},
+    {key:'dtp_reforco', label:'DTP (reforços)', doses:2},
+    {key:'varicela', label:'Varicela', doses:2},
+    {key:'hepa', label:'Hepatite A', doses:1},
+    {key:'febre_amarela', label:'Febre amarela', doses:2},
+    {key:'covid', label:'Covid-19', doses:3},
+    {key:'hpv', label:'HPV (a partir dos 9 anos)', doses:1},
+    {key:'influenza', label:'Influenza (dose anual, a partir dos 6 meses)', doses:1}
+  ],
+  'Adolescente e Jovem': [
+    {key:'hpv', label:'HPV', doses:1},
+    {key:'hepb', label:'Hepatite B (conforme histórico)', doses:3},
+    {key:'febre_amarela', label:'Febre amarela (conforme histórico)', doses:1},
+    {key:'triplice', label:'Tríplice viral (SCR)', doses:2},
+    {key:'varicela', label:'Varicela', doses:2},
+    {key:'dengue', label:'Dengue (10 a 14 anos)', doses:2},
+    {key:'menacwy', label:'Meningocócica ACWY (11 a 14 anos)', doses:1},
+    {key:'dt', label:'dT (reforços aos 14 e 24 anos)', doses:2}
+  ],
+  'Adulto': [
+    {key:'hepb', label:'Hepatite B (conforme histórico)', doses:3},
+    {key:'dt', label:'dT (difteria e tétano, reforço a cada 10 anos)', doses:3},
+    {key:'febre_amarela', label:'Febre amarela (conforme histórico)', doses:1},
+    {key:'triplice', label:'Tríplice viral (SCR, conforme histórico)', doses:2}
+  ],
+  'Idoso': [
+    {key:'hepb', label:'Hepatite B (conforme histórico)', doses:3},
+    {key:'dt', label:'dT (difteria e tétano, reforço a cada 10 anos)', doses:3},
+    {key:'febre_amarela', label:'Febre amarela (conforme histórico)', doses:1},
+    {key:'triplice', label:'Tríplice viral (SCR, conforme histórico)', doses:2},
+    {key:'pneumo20', label:'Pneumocócica 20-valente (acamados/institucionalizados)', doses:1},
+    {key:'influenza', label:'Influenza (dose anual)', doses:1},
+    {key:'covid', label:'Covid-19 (dose semestral)', doses:1}
+  ]
+};
 
-function populateDateSelects(){
-  for(let d = 1; d <= 31; d++){
-    const opt = document.createElement('option');
-    opt.value = String(d).padStart(2,'0');
-    opt.textContent = d;
-    diaInput.appendChild(opt);
-  }
-  MESES.forEach((nome, idx) => {
-    const opt = document.createElement('option');
-    opt.value = String(idx+1).padStart(2,'0');
-    opt.textContent = nome;
-    mesInput.appendChild(opt);
-  });
-  const currentYear = new Date().getFullYear();
-  for(let y = currentYear; y >= currentYear - 120; y--){
-    const opt = document.createElement('option');
-    opt.value = String(y);
-    opt.textContent = y;
-    anoInput.appendChild(opt);
-  }
-}
-populateDateSelects();
-
-function getNascimentoISO(){
-  if(!diaInput.value || !mesInput.value || !anoInput.value) return '';
-  return `${anoInput.value}-${mesInput.value}-${diaInput.value}`;
-}
-
-function setNascimentoFromISO(iso){
-  if(!iso){
-    diaInput.value = '';
-    mesInput.value = '';
-    anoInput.value = '';
-    return;
-  }
-  const [y,m,d] = iso.split('-');
-  anoInput.value = y;
-  mesInput.value = m;
-  diaInput.value = d;
-}
-
-function updateAgePreview(){
-  const iso = getNascimentoISO();
-  if(!iso){ agePreview.textContent = ''; return; }
+function vaccinePhase(iso){
   const age = calcAge(iso);
-  agePreview.textContent = age !== null && age >= 0 ? `${age} anos · ${ageGroup(iso)}` : 'Data inválida';
+  if(age === null) return null;
+  if(age < 10) return 'Criança';
+  if(age < 25) return 'Adolescente e Jovem';
+  if(age < 60) return 'Adulto';
+  return 'Idoso';
 }
 
-[diaInput, mesInput, anoInput].forEach(sel => sel.addEventListener('change', updateAgePreview));
-
-const STORAGE_KEY = 'cadsaude-people-list';
-
-async function loadPeople(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    people = raw ? JSON.parse(raw) : [];
-  }catch(e){
-    people = [];
-  }
-  render();
-}
-
-async function savePeople(){
-  try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(people));
-    return true;
-  }catch(e){
-    showToast('Erro ao salvar. O armazenamento do navegador pode estar cheio ou bloqueado.');
-    return false;
-  }
-}
-
-function normalize(str){
-  return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-}
-
-function render(){
-  const rawTerm = searchInput.value.trim();
-  const term = normalize(rawTerm);
-  const termDigits = rawTerm.replace(/\D/g,'');
-  const filtered = people.filter(p => {
-    if(!rawTerm) return true;
-    const nomeMatch = normalize(p.nome).includes(term);
-    const cpfMatch = termDigits && p.cpf && p.cpf.replace(/\D/g,'').includes(termDigits);
-    return nomeMatch || cpfMatch;
-  }).sort((a,b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-
-  countBadge.textContent = `(${people.length})`;
-
-  if(filtered.length === 0){
-    listContainer.innerHTML = `<div class="empty-state">${people.length === 0 ? 'Nenhuma pessoa cadastrada ainda.' : 'Nenhum resultado para essa busca.'}</div>`;
+function renderVaccineFields(iso, existingVacinas){
+  const container = document.getElementById('vaccine-list');
+  const phase = vaccinePhase(iso);
+  if(!phase){
+    container.innerHTML = '<p class="vaccine-empty">Preencha a data de nascimento para ver as vacinas dessa faixa etária.</p>';
     return;
   }
-
-  listContainer.innerHTML = filtered.map(p => {
-    const condTags = (p.condicoes || []).map(c => `<span class="tag condition">${escapeHtml(c)}</span>`).join('');
-    return `
-    <div class="person">
-      <div class="person-top">
-        <div>
-          <div class="person-name">${escapeHtml(p.nome)}</div>
-          <div class="person-details">
-            <span class="tag">${p.sexo}</span>
-            <span class="tag age">${ageGroup(p.nascimento)}</span>
-            Nasc.: ${formatDateBR(p.nascimento)}${p.cpf ? ' · CPF: ' + p.cpf : ''}
-          </div>
-          <div class="person-details">${condTags}</div>
-        </div>
-        <div class="actions">
-          <button class="icon-btn edit" onclick="startEdit('${p.id}')">Editar</button>
-          <button class="icon-btn del" onclick="deletePerson('${p.id}')">Excluir</button>
-        </div>
-      </div>
-    </div>
-  `;
+  const list = VACCINE_SCHEDULE[phase] || [];
+  const data = existingVacinas || {};
+  container.innerHTML = list.map(v => {
+    const checked = data[v.key] || [];
+    let doseChecks = '';
+    for(let i = 0; i < v.doses; i++){
+      const isChecked = checked[i] ? 'checked' : '';
+      const doseLabel = v.doses === 1 ? 'Dose única' : `${i+1}ª dose`;
+      doseChecks += `<label class="dose-check"><input type="checkbox" class="vaccine-dose" data-vaccine="${v.key}" data-dose="${i}"> ${doseLabel}</label>`;
+    }
+    return `<div class="vaccine-item"><div class="vaccine-item-name">${v.label}</div><div class="vaccine-doses">${doseChecks}</div></div>`;
   }).join('');
-}
 
-function escapeHtml(str){
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-window.startEdit = function(id){
-  const p = people.find(x => x.id === id);
-  if(!p) return;
-  editingId = id;
-  nomeInput.value = p.nome;
-  sexoInput.value = p.sexo;
-  setNascimentoFromISO(p.nascimento);
-  cpfInput.value = p.cpf || '';
-  document.querySelectorAll('.cond-check').forEach(chk => {
-    chk.checked = (p.condicoes || []).includes(chk.value);
+  // marcar caixas já preenchidas
+  Object.keys(data).forEach(key => {
+    (data[key] || []).forEach((val, idx) => {
+      if(val){
+        const box = container.querySelector(`.vaccine-dose[data-vaccine="${key}"][data-dose="${idx}"]`);
+        if(box) box.checked = true;
+      }
+    });
   });
-  const age = calcAge(p.nascimento);
-  agePreview.textContent = age !== null ? `${age} anos · ${ageGroup(p.nascimento)}` : '';
-  formTitle.textContent = 'Editar pessoa';
-  submitBtn.textContent = 'Atualizar';
-  cancelEditBtn.style.display = 'inline-block';
-  clearErrors();
-  window.scrollTo({top:0, behavior:'smooth'});
 }
 
-window.deletePerson = async function(id){
-  const p = people.find(x => x.id === id);
-  if(!p) return;
-  if(!confirm(`Excluir o cadastro de ${p.nome}?`)) return;
-  people = people.filter(x => x.id !== id);
-  const ok = await savePeople();
-  if(ok){
-    render();
-    showToast('Cadastro excluído.');
-  }
+function collectVaccineData(){
+  const result = {};
+  document.querySelectorAll('.vaccine-dose').forEach(box => {
+    const key = box.dataset.vaccine;
+    const dose = parseInt(box.dataset.dose, 10);
+    if(!result[key]) result[key] = [];
+    result[key][dose] = box.checked;
+  });
+  return result;
 }
 
-cancelEditBtn.addEventListener('click', () => {
-  resetForm();
-});
-
-function resetForm(){
-  editingId = null;
-  form.reset();
-  agePreview.textContent = '';
-  formTitle.textContent = 'Nova pessoa';
-  submitBtn.textContent = 'Salvar';
-  cancelEditBtn.style.display = 'none';
-  clearErrors();
-}
-
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  clearErrors();
-
-  let valid = true;
-  const nome = nomeInput.value.trim();
-  const sexo = sexoInput.value;
-  const nascimento = getNascimentoISO();
-  const cpf = cpfInput.value.trim();
-  const condicoes = Array.from(document.querySelectorAll('.cond-check:checked')).map(c => c.value);
-
-  if(!nome){
-    document.getElementById('err-nome').textContent = 'Informe o nome.';
-    valid = false;
-  }
-  if(!sexo){
-    document.getElementById('err-sexo').textContent = 'Selecione o sexo.';
-    valid = false;
-  }
-  if(!nascimento){
-    document.getElementById('err-nascimento').textContent = 'Informe a data de nascimento.';
-    valid = false;
-  } else {
-    const [y,m,d] = nascimento.split('-').map(Number);
-    const test = new Date(y, m-1, d);
-    if(test.getFullYear() !== y || test.getMonth() !== m-1 || test.getDate() !== d){
-      document.getElementById('err-nascimento').textContent = 'Essa data não existe.';
-      valid = false;
-    }
-  }
-  if(cpf && !isValidCPF(cpf)){
-    document.getElementById('err-cpf').textContent = 'CPF inválido.';
-    valid = false;
-  }
-  if(cpf){
-    const digits = cpf.replace(/\D/g,'');
-    const dup = people.find(p => p.cpf && p.cpf.replace(/\D/g,'') === digits && p.id !== editingId);
-    if(dup){
-      document.getElementById('err-cpf').textContent = 'Já existe uma pessoa cadastrada com esse CPF.';
-      valid = false;
-    }
-  }
-
-  if(valid){
-    const nomeNorm = normalize(nome);
-    const possivelDup = people.find(p =>
-      p.id !== edi
+function vaccineStatus(nascimento, vacinas){
+  const phase = vaccinePhase(nascimento);
+  if(!phase) return null;
+  const list = VACCINE_SCHEDULE[phase] || [];
+  const data = vacinas || {};
+  let complete = 0;
+  const missing = [];
+  list.forEach(v => {
+    const checked = data[v.key] || [];
+    const takenCount = checked.filter(Boolean).length;
+    if(takenCount >=
