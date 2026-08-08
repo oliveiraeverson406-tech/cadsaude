@@ -623,6 +623,80 @@
     padding:10px 6px;
     text-align:center;
   }
+  .stats-section{
+    margin-bottom:18px;
+  }
+  .stats-section:last-child{
+    margin-bottom:0;
+  }
+  .stats-section-title{
+    font-size:0.82rem;
+    font-weight:700;
+    color:var(--accent-dark);
+    margin-bottom:8px;
+    padding-bottom:6px;
+    border-bottom:1px solid var(--line);
+  }
+  .stats-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .stat-box{
+    background:#fbfcfa;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+  }
+  .stat-box.highlight{
+    background:var(--accent-dark);
+    border-color:var(--accent-dark);
+  }
+  .stat-box.highlight .stat-label,
+  .stat-box.highlight .stat-value{
+    color:#fff;
+  }
+  .stat-label{
+    font-size:0.72rem;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .stat-value{
+    font-size:1.25rem;
+    font-weight:700;
+    color:var(--accent-dark);
+    margin-top:2px;
+  }
+  .stats-breakdown{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .stats-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:6px 4px;
+    font-size:0.85rem;
+    border-bottom:1px solid var(--line);
+  }
+  .stats-row:last-child{
+    border-bottom:none;
+  }
+  .stats-row-count{
+    font-weight:700;
+    color:var(--accent-dark);
+    background:#e3ece5;
+    padding:1px 9px;
+    border-radius:20px;
+    font-size:0.78rem;
+    min-width:28px;
+    text-align:center;
+  }
+  .stats-row-count.zero{
+    color:var(--muted);
+    background:#eceee7;
+  }
 </style>
 </head>
 <body>
@@ -729,6 +803,10 @@
           <span class="category-icon">🧑</span>
           <span class="category-label">Usuários</span>
         </button>
+        <button type="button" class="category-btn" data-filter="quantitativo">
+          <span class="category-icon">📊</span>
+          <span class="category-label">Quantitativo</span>
+        </button>
         <button type="button" class="category-btn" data-filter="vacinas">
           <span class="category-icon">💉</span>
           <span class="category-label">Vacinas</span>
@@ -809,11 +887,11 @@ window.addEventListener('error', (event) => {
   const container = document.getElementById('list-container');
   const msg = (event.error && (event.error.stack || event.error.message)) || event.message || 'erro desconhecido';
   const box = document.createElement('div');
-  box.style.cssText = 'background:#fbe9e6;border:1px solid #eab6ac;border-radius:8px;padding:12px;margin:12px;font-size:0.78rem;color:#a13e2f;white-space:pre-wrap;word-break:break-word;';
+  box.style.cssText = 'background:#fbe9e6;border:1px solid #eab6ac;border-radius:8px;padding:10px 12px;margin:10px;font-size:0.78rem;color:#a13e2f;white-space:pre-wrap;word-break:break-word;';
   box.textContent = 'Erro no app: ' + msg;
   document.body.prepend(box);
   if(container && container.textContent.includes('Carregando')){
-    container.innerHTML = '<div class="empty-state">Ocorreu um erro ao carregar. Veja a mensagem vermelha no topo da tela e me avise.</div>';
+    container.innerHTML = '<div class="empty-state">Ocorreu um erro ao carregar. Veja a mensagem no topo da página e me avise.</div>';
   }
 });
 
@@ -901,6 +979,16 @@ function calcAge(iso){
   return age;
 }
 
+function calcAgeMonths(iso){
+  if(!iso) return null;
+  const birth = new Date(iso + 'T00:00:00');
+  const today = new Date();
+  let months = (today.getFullYear() - birth.getFullYear()) * 12 + (today.getMonth() - birth.getMonth());
+  if(today.getDate() < birth.getDate()) months--;
+  if(months < 0) months = 0;
+  return months;
+}
+
 function ageGroup(iso){
   const age = calcAge(iso);
   if(age === null) return '';
@@ -909,8 +997,8 @@ function ageGroup(iso){
   return 'Idoso';
 }
 
-// Cronograma simplificado com base no Calendário Nacional de Vacinação (Ministério da Saúde/PNI).
-// É uma visão geral organizacional — não substitui avaliação da equipe de saúde em casos de dúvida.
+// Cronograma simplificado com base no Calendário Nacional de Vacinação (Ministério da Saúde).
+// É uma visão geral organizacional — não substitui avaliação da equipe de saúde em cada caso.
 const VACCINE_SCHEDULE = {
   'Criança': [
     {key:'bcg', label:'BCG', doses:1},
@@ -981,7 +1069,7 @@ function renderVaccineFields(iso, existingVacinas){
     for(let i = 0; i < v.doses; i++){
       const isChecked = checked[i] ? 'checked' : '';
       const doseLabel = v.doses === 1 ? 'Dose única' : `${i+1}ª dose`;
-      doseChecks += `<label class="dose-check"><input type="checkbox" class="vaccine-dose" data-vaccine="${v.key}" data-dose="${i}"> ${doseLabel}</label>`;
+      doseChecks += `<label class="dose-check"><input type="checkbox" class="vaccine-dose" data-vaccine="${v.key}" data-dose="${i}" ${isChecked}> ${doseLabel}</label>`;
     }
     return `<div class="vaccine-item"><div class="vaccine-item-name">${v.label}</div><div class="vaccine-doses">${doseChecks}</div></div>`;
   }).join('');
@@ -1071,7 +1159,7 @@ function updateAgePreview(){
   const iso = getNascimentoISO();
   if(!iso){ agePreview.textContent = ''; return; }
   const age = calcAge(iso);
-  agePreview.textContent = age !== null && age >= 0 ? `${age} anos · ${ageGroup(iso)}` : 'Data inválida';
+  agePreview.textContent = age !== null && age >= 0 ? `${age} anos · ${ageGroup(iso)}` : '';
 }
 
 [diaInput, mesInput, anoInput].forEach(sel => sel.addEventListener('change', () => {
@@ -1107,8 +1195,90 @@ function normalize(str){
   return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 }
 
+// ===== Quantitativo =====
+function buildStats(){
+  const total = people.length;
+  const criancas = people.filter(p => ageGroup(p.nascimento) === 'Criança');
+  const adultos = people.filter(p => ageGroup(p.nascimento) === 'Adulto').length;
+  const idosos = people.filter(p => ageGroup(p.nascimento) === 'Idoso').length;
+
+  const diabeticos = people.filter(p => (p.condicoes||[]).includes('Diabetes')).length;
+  const hipertensos = people.filter(p => (p.condicoes||[]).includes('Hipertensão')).length;
+  const ambos = people.filter(p => (p.condicoes||[]).includes('Diabetes') && (p.condicoes||[]).includes('Hipertensão')).length;
+  const acamados = people.filter(p => (p.condicoes||[]).includes('Acamado')).length;
+
+  const porMes = Array(12).fill(0);
+  const porAno = {};
+  criancas.forEach(p => {
+    const anos = calcAge(p.nascimento);
+    if(anos === 0){
+      const meses = calcAgeMonths(p.nascimento);
+      porMes[Math.min(meses,11)]++;
+    } else if(anos >= 1 && anos <= 11){
+      porAno[anos] = (porAno[anos] || 0) + 1;
+    }
+  });
+
+  return { total, criancasTotal: criancas.length, adultos, idosos, diabeticos, hipertensos, ambos, acamados, porMes, porAno };
+}
+
+function renderStats(){
+  const s = buildStats();
+  countBadge.textContent = `(${people.length})`;
+
+  let mesesHtml = '';
+  for(let i = 0; i < 12; i++){
+    const label = i === 0 ? 'Menos de 1 mês' : (i === 1 ? '1 mês' : `${i} meses`);
+    const count = s.porMes[i];
+    mesesHtml += `<div class="stats-row"><span>${label}</span><span class="stats-row-count ${count===0?'zero':''}">${count}</span></div>`;
+  }
+
+  let anosHtml = '';
+  for(let a = 1; a <= 11; a++){
+    const label = a === 1 ? '1 ano' : `${a} anos`;
+    const count = s.porAno[a] || 0;
+    anosHtml += `<div class="stats-row"><span>${label}</span><span class="stats-row-count ${count===0?'zero':''}">${count}</span></div>`;
+  }
+
+  listContainer.innerHTML = `
+    <div class="stats-section">
+      <div class="stats-section-title">Totais gerais</div>
+      <div class="stats-grid">
+        <div class="stat-box highlight"><div class="stat-label">Total geral</div><div class="stat-value">${s.total}</div></div>
+        <div class="stat-box"><div class="stat-label">Crianças (0-11 anos)</div><div class="stat-value">${s.criancasTotal}</div></div>
+        <div class="stat-box"><div class="stat-label">Adultos</div><div class="stat-value">${s.adultos}</div></div>
+        <div class="stat-box"><div class="stat-label">Idosos</div><div class="stat-value">${s.idosos}</div></div>
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <div class="stats-section-title">Condições de saúde</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-label">🩸 Diabéticos</div><div class="stat-value">${s.diabeticos}</div></div>
+        <div class="stat-box"><div class="stat-label">❤️ Hipertensos</div><div class="stat-value">${s.hipertensos}</div></div>
+        <div class="stat-box"><div class="stat-label">🩸❤️ Diabético e Hipertenso</div><div class="stat-value">${s.ambos}</div></div>
+        <div class="stat-box"><div class="stat-label">🛏️ Acamados</div><div class="stat-value">${s.acamados}</div></div>
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <div class="stats-section-title">Crianças por idade — menores de 1 ano (${s.porMes.reduce((a,b)=>a+b,0)})</div>
+      <div class="stats-breakdown">${mesesHtml}</div>
+    </div>
+
+    <div class="stats-section">
+      <div class="stats-section-title">Crianças por idade — 1 a 11 anos (${Object.values(s.porAno).reduce((a,b)=>a+b,0)})</div>
+      <div class="stats-breakdown">${anosHtml}</div>
+    </div>
+  `;
+}
+
 function render(){
  try {
+  if(activeFilter === 'quantitativo'){
+    renderStats();
+    return;
+  }
   const rawTerm = searchInput.value.trim();
   const term = normalize(rawTerm);
   const termDigits = rawTerm.replace(/\D/g,'');
@@ -1143,7 +1313,7 @@ function render(){
     let cardClass = 'person';
     if(vstatus){
       const isComplete = vstatus.missing.length === 0;
-      vaccineHtml = `<div class="vaccine-summary ${isComplete ? 'complete' : 'incomplete'}">💉 Vacinas: ${vstatus.complete}/${vstatus.total} em dia</div>`;
+      vaccineHtml = `<div class="vaccine-summary ${isComplete ? 'complete' : 'incomplete'}">${vstatus.complete}/${vstatus.total} em dia</div>`;
       if(!isComplete){
         vaccineHtml += `<div class="vaccine-missing">⚠️ Faltando: ${escapeHtml(vstatus.missing.join(', '))}</div>`;
         alertBadge = '<span class="alert-badge">⚠️ Vacina pendente</span>';
