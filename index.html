@@ -198,6 +198,7 @@
   }
   .tag.age{background:#dde7f0; color:#2a4d6b;}
   .tag.condition{background:#f6e4d9; color:var(--warn);}
+  .tag.med{background:#e6e9f6; color:#3a3f8f;}
   .actions{
     display:flex;
     gap:6px;
@@ -373,6 +374,67 @@
     background:var(--accent-dark);
     border-color:var(--accent-dark);
     color:#fff;
+  }
+  .banner-photo{
+    width:100%;
+    max-height:160px;
+    object-fit:cover;
+    border-radius:8px;
+    margin-bottom:10px;
+    display:block;
+  }
+  .modal-aviso-photo{
+    width:100%;
+    border-radius:10px;
+    margin-bottom:12px;
+    display:block;
+  }
+  .modal-aviso-video{
+    margin-top:12px;
+  }
+  .modal-aviso-video iframe{
+    width:100%;
+    aspect-ratio:16/9;
+    border:none;
+    border-radius:10px;
+  }
+  .modal-aviso-video a{
+    display:inline-block;
+    background:var(--accent);
+    color:#fff;
+    text-decoration:none;
+    padding:9px 16px;
+    border-radius:7px;
+    font-size:0.85rem;
+    font-weight:600;
+  }
+  .aviso-manage-photo{
+    width:44px;
+    height:44px;
+    object-fit:cover;
+    border-radius:8px;
+    flex-shrink:0;
+  }
+  .foto-preview-box{
+    margin-top:8px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .foto-preview-box img{
+    width:64px;
+    height:64px;
+    object-fit:cover;
+    border-radius:8px;
+    border:1px solid var(--line);
+  }
+  .foto-preview-remove{
+    background:none;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:5px 10px;
+    font-size:0.76rem;
+    color:var(--danger);
   }
   .modal-overlay{
     display:none;
@@ -779,6 +841,23 @@
         </div>
       </fieldset>
 
+      <fieldset>
+        <legend>Medicamentos em uso</legend>
+        <div class="check-grid">
+          <label class="check-item"><input type="checkbox" value="Metformina 500 mg" class="med-check"> Metformina 500 mg</label>
+          <label class="check-item"><input type="checkbox" value="Metformina 850 mg" class="med-check"> Metformina 850 mg</label>
+          <label class="check-item"><input type="checkbox" value="Captopril 25 mg" class="med-check"> Captopril 25 mg</label>
+          <label class="check-item"><input type="checkbox" value="AAS 100 mg" class="med-check"> AAS 100 mg</label>
+          <label class="check-item"><input type="checkbox" value="Losartana 50 mg" class="med-check"> Losartana 50 mg</label>
+          <label class="check-item"><input type="checkbox" value="Hidroclorotiazida 25 mg" class="med-check"> Hidroclorotiazida 25 mg</label>
+          <label class="check-item"><input type="checkbox" value="Nifedipina 20 mg" class="med-check"> Nifedipina 20 mg</label>
+          <label class="check-item"><input type="checkbox" value="Nifedipina 10 mg" class="med-check"> Nifedipina 10 mg</label>
+          <label class="check-item"><input type="checkbox" value="Glibenclamida 5 mg" class="med-check"> Glibenclamida 5 mg</label>
+        </div>
+        <label for="med-outros">Outros medicamentos (opcional)</label>
+        <input type="text" id="med-outros" autocomplete="off" placeholder="Ex: Sinvastatina, Insulina...">
+      </fieldset>
+
       <fieldset id="vaccine-fieldset">
         <legend>Vacinas</legend>
         <div class="vaccine-note">Marque as doses que a pessoa já tomou, olhando a carteira de vacinas. As vacinas mudam conforme a idade.</div>
@@ -868,6 +947,18 @@
 
       <label for="aviso-mensagem">Mensagem</label>
       <textarea id="aviso-mensagem" rows="4" placeholder="Detalhes do aviso ou campanha..." required></textarea>
+
+      <label for="aviso-foto">Foto (opcional)</label>
+      <input type="file" id="aviso-foto" accept="image/*">
+      <div class="foto-preview-box" id="aviso-foto-preview" style="display:none;">
+        <img id="aviso-foto-img" src="" alt="Pré-visualização">
+        <button type="button" class="foto-preview-remove" id="aviso-foto-remove">Remover foto</button>
+      </div>
+      <div class="age-note">A foto é comprimida automaticamente antes de salvar.</div>
+
+      <label for="aviso-video">Link de vídeo (opcional)</label>
+      <input type="url" id="aviso-video" placeholder="Cole aqui o link do YouTube, por exemplo">
+      <div class="age-note">Vídeo grande não cabe no armazenamento do app — por isso é por link, não por upload.</div>
 
       <div class="btn-row">
         <button type="submit" class="btn-primary" id="aviso-submit-btn">Adicionar aviso</button>
@@ -1307,6 +1398,9 @@ function render(){
 
   listContainer.innerHTML = filtered.map(p => {
     const condTags = (p.condicoes || []).map(c => `<span class="tag condition">${escapeHtml(c)}</span>`).join('');
+    const medList = [...(p.medicamentos || [])];
+    if(p.medOutros) medList.push(p.medOutros);
+    const medTags = medList.map(m => `<span class="tag med">💊 ${escapeHtml(m)}</span>`).join('');
     const vstatus = vaccineStatus(p.nascimento, p.vacinas);
     let vaccineHtml = '';
     let alertBadge = '';
@@ -1331,6 +1425,7 @@ function render(){
             Nasc.: ${formatDateBR(p.nascimento)}${p.cpf ? ' · CPF: ' + p.cpf : ''}
           </div>
           <div class="person-details">${condTags}</div>
+          ${medTags ? `<div class="person-details">${medTags}</div>` : ''}
           ${vaccineHtml}
         </div>
         <div class="actions">
@@ -1364,6 +1459,10 @@ window.startEdit = function(id){
   document.querySelectorAll('.cond-check').forEach(chk => {
     chk.checked = (p.condicoes || []).includes(chk.value);
   });
+  document.querySelectorAll('.med-check').forEach(chk => {
+    chk.checked = (p.medicamentos || []).includes(chk.value);
+  });
+  document.getElementById('med-outros').value = p.medOutros || '';
   const age = calcAge(p.nascimento);
   agePreview.textContent = age !== null ? `${age} anos · ${ageGroup(p.nascimento)}` : '';
   renderVaccineFields(p.nascimento, p.vacinas);
@@ -1411,6 +1510,8 @@ form.addEventListener('submit', async (e) => {
   const nascimento = getNascimentoISO();
   const cpf = cpfInput.value.trim();
   const condicoes = Array.from(document.querySelectorAll('.cond-check:checked')).map(c => c.value);
+  const medicamentos = Array.from(document.querySelectorAll('.med-check:checked')).map(c => c.value);
+  const medOutros = document.getElementById('med-outros').value.trim();
   const vacinas = collectVaccineData();
 
   if(!nome){
@@ -1464,12 +1565,12 @@ form.addEventListener('submit', async (e) => {
   if(editingId){
     const idx = people.findIndex(p => p.id === editingId);
     if(idx !== -1){
-      people[idx] = { ...people[idx], nome, sexo, nascimento, cpf, condicoes, vacinas };
+      people[idx] = { ...people[idx], nome, sexo, nascimento, cpf, condicoes, medicamentos, medOutros, vacinas };
     }
   } else {
     people.push({
       id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
-      nome, sexo, nascimento, cpf, condicoes, vacinas
+      nome, sexo, nascimento, cpf, condicoes, medicamentos, medOutros, vacinas
     });
   }
 
@@ -1499,11 +1600,13 @@ exportBtn.addEventListener('click', () => {
     showToast('Nada para exportar.');
     return;
   }
-  const rows = [['Nome','Sexo','Idade','Faixa etária','Data de nascimento','CPF','Condições de saúde']];
+  const rows = [['Nome','Sexo','Idade','Faixa etária','Data de nascimento','CPF','Condições de saúde','Medicamentos em uso']];
   people.slice().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR')).forEach(p => {
+    const medList = [...(p.medicamentos || [])];
+    if(p.medOutros) medList.push(p.medOutros);
     rows.push([
       p.nome, p.sexo, String(calcAge(p.nascimento) ?? ''), ageGroup(p.nascimento),
-      formatDateBR(p.nascimento), p.cpf || '', (p.condicoes || []).join(', ')
+      formatDateBR(p.nascimento), p.cpf || '', (p.condicoes || []).join(', '), medList.join(', ')
     ]);
   });
   const csv = rows.map(r => r.map(v => `"${(v||'').replace(/"/g,'""')}"`).join(';')).join('\n');
@@ -1594,6 +1697,62 @@ const avisoMensagemInput = document.getElementById('aviso-mensagem');
 const avisoSubmitBtn = document.getElementById('aviso-submit-btn');
 const avisoCancelEditBtn = document.getElementById('aviso-cancel-edit');
 const avisoListEl = document.getElementById('aviso-list');
+const avisoFotoInput = document.getElementById('aviso-foto');
+const avisoFotoPreview = document.getElementById('aviso-foto-preview');
+const avisoFotoImg = document.getElementById('aviso-foto-img');
+const avisoFotoRemove = document.getElementById('aviso-foto-remove');
+const avisoVideoInput = document.getElementById('aviso-video');
+let avisoFotoData = null;
+
+function resizeImageFile(file, maxWidth, quality){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Não foi possível ler a imagem.'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Arquivo de imagem inválido.'));
+      img.onload = () => {
+        let { width, height } = img;
+        if(width > maxWidth){
+          height = Math.round(height * (maxWidth / width));
+          width = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function getYoutubeEmbedUrl(url){
+  if(!url) return null;
+  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{6,})/);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
+avisoFotoInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    avisoFotoData = await resizeImageFile(file, 900, 0.75);
+    avisoFotoImg.src = avisoFotoData;
+    avisoFotoPreview.style.display = 'flex';
+  }catch(err){
+    showToast('Não foi possível carregar essa foto.');
+  }
+  avisoFotoInput.value = '';
+});
+
+avisoFotoRemove.addEventListener('click', () => {
+  avisoFotoData = null;
+  avisoFotoImg.src = '';
+  avisoFotoPreview.style.display = 'none';
+});
 
 const AVISOS_EXEMPLO = [
   {
@@ -1630,7 +1789,7 @@ function saveAvisos(){
     localStorage.setItem(AVISOS_KEY, JSON.stringify(avisos));
     return true;
   }catch(e){
-    showToast('Erro ao salvar avisos.');
+    showToast('Não deu pra salvar — o armazenamento pode estar cheio. Tente uma foto menor.');
     return false;
   }
 }
@@ -1643,13 +1802,30 @@ function renderBanner(){
   }
   if(currentSlideIndex >= avisos.length) currentSlideIndex = 0;
   const a = avisos[currentSlideIndex];
-  bannerSlide.innerHTML = `
-    <div class="banner-icon">${escapeHtml(a.icone || '📢')}</div>
-    <div class="banner-text">
-      <div class="banner-title">${escapeHtml(a.titulo)}</div>
-      <div class="banner-excerpt">${escapeHtml(a.mensagem)}</div>
-    </div>
-  `;
+  if(a.foto){
+    bannerSlide.style.flexDirection = 'column';
+    bannerSlide.style.alignItems = 'stretch';
+    bannerSlide.innerHTML = `
+      <img class="banner-photo" src="${a.foto}" alt="">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="banner-icon">${escapeHtml(a.icone || '📢')}</div>
+        <div class="banner-text">
+          <div class="banner-title">${escapeHtml(a.titulo)}</div>
+          <div class="banner-excerpt">${escapeHtml(a.mensagem)}</div>
+        </div>
+      </div>
+    `;
+  } else {
+    bannerSlide.style.flexDirection = 'row';
+    bannerSlide.style.alignItems = 'center';
+    bannerSlide.innerHTML = `
+      <div class="banner-icon">${escapeHtml(a.icone || '📢')}</div>
+      <div class="banner-text">
+        <div class="banner-title">${escapeHtml(a.titulo)}</div>
+        <div class="banner-excerpt">${escapeHtml(a.mensagem)}</div>
+      </div>
+    `;
+  }
   bannerDots.innerHTML = avisos.map((av, idx) => `
     <button type="button" class="banner-dot ${idx === currentSlideIndex ? 'active' : ''}" data-idx="${idx}">
       <span>${escapeHtml(av.icone || '📢')}</span>
@@ -1680,10 +1856,20 @@ function startSlideTimer(){
 function openAvisoModal(idx){
   const a = avisos[idx];
   if(!a) return;
+  const fotoHtml = a.foto ? `<img class="modal-aviso-photo" src="${a.foto}" alt="">` : '';
+  let videoHtml = '';
+  if(a.video){
+    const embedUrl = getYoutubeEmbedUrl(a.video);
+    videoHtml = embedUrl
+      ? `<div class="modal-aviso-video"><iframe src="${embedUrl}" allowfullscreen></iframe></div>`
+      : `<div class="modal-aviso-video"><a href="${escapeHtml(a.video)}" target="_blank" rel="noopener">▶ Assistir vídeo</a></div>`;
+  }
   avisoModalContent.innerHTML = `
+    ${fotoHtml}
     <div class="modal-aviso-icon">${escapeHtml(a.icone || '📢')}</div>
     <div class="modal-aviso-title">${escapeHtml(a.titulo)}</div>
     <div class="modal-aviso-message">${escapeHtml(a.mensagem)}</div>
+    ${videoHtml}
   `;
   avisoModal.classList.add('show');
 }
@@ -1713,7 +1899,7 @@ function renderAvisoManageList(){
   }
   avisoListEl.innerHTML = avisos.map(a => `
     <div class="aviso-manage-item">
-      <div class="aviso-manage-icon">${escapeHtml(a.icone || '📢')}</div>
+      ${a.foto ? `<img class="aviso-manage-photo" src="${a.foto}" alt="">` : `<div class="aviso-manage-icon">${escapeHtml(a.icone || '📢')}</div>`}
       <div class="aviso-manage-text">
         <div class="aviso-manage-title">${escapeHtml(a.titulo)}</div>
         <div class="aviso-manage-message">${escapeHtml(a.mensagem)}</div>
@@ -1729,6 +1915,9 @@ function renderAvisoManageList(){
 function resetAvisoForm(){
   editingAvisoId = null;
   avisoForm.reset();
+  avisoFotoData = null;
+  avisoFotoImg.src = '';
+  avisoFotoPreview.style.display = 'none';
   avisoSubmitBtn.textContent = 'Adicionar aviso';
   avisoCancelEditBtn.style.display = 'none';
 }
@@ -1740,6 +1929,15 @@ window.startEditAviso = function(id){
   avisoIconeInput.value = a.icone || '';
   avisoTituloInput.value = a.titulo;
   avisoMensagemInput.value = a.mensagem;
+  avisoVideoInput.value = a.video || '';
+  avisoFotoData = a.foto || null;
+  if(avisoFotoData){
+    avisoFotoImg.src = avisoFotoData;
+    avisoFotoPreview.style.display = 'flex';
+  } else {
+    avisoFotoImg.src = '';
+    avisoFotoPreview.style.display = 'none';
+  }
   avisoSubmitBtn.textContent = 'Atualizar aviso';
   avisoCancelEditBtn.style.display = 'inline-block';
 };
@@ -1763,15 +1961,16 @@ avisoForm.addEventListener('submit', (e) => {
   const icone = avisoIconeInput.value.trim();
   const titulo = avisoTituloInput.value.trim();
   const mensagem = avisoMensagemInput.value.trim();
+  const video = avisoVideoInput.value.trim();
   if(!titulo || !mensagem) return;
 
   if(editingAvisoId){
     const idx = avisos.findIndex(a => a.id === editingAvisoId);
-    if(idx !== -1) avisos[idx] = { ...avisos[idx], icone, titulo, mensagem };
+    if(idx !== -1) avisos[idx] = { ...avisos[idx], icone, titulo, mensagem, foto: avisoFotoData, video };
   } else {
     avisos.push({
       id: 'a_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
-      icone, titulo, mensagem
+      icone, titulo, mensagem, foto: avisoFotoData, video
     });
   }
   if(saveAvisos()){
