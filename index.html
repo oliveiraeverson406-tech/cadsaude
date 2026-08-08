@@ -1421,7 +1421,7 @@ function render(){
           <div class="person-name">${escapeHtml(p.nome)}${alertBadge}</div>
           <div class="person-details">
             <span class="tag">${p.sexo}</span>
-            <span class="tag age">${ageGroup(p.nascimento)}</span>
+            <span class="tag age">${calcAge(p.nascimento)} anos · ${ageGroup(p.nascimento)}</span>
             Nasc.: ${formatDateBR(p.nascimento)}${p.cpf ? ' · CPF: ' + p.cpf : ''}
           </div>
           <div class="person-details">${condTags}</div>
