@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cadsaude-cache-v15';
+const CACHE_NAME = 'cadsaude-cache-v16';
 const FILES_TO_CACHE = [
   './index.html',
   './manifest.json',
