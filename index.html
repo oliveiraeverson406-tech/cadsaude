@@ -1113,25 +1113,26 @@ function ageGroup(iso){
   return 'Idoso';
 }
 
-// Cronograma simplificado com base no Calendário Nacional de Vacinação (Ministério da Saúde).
+// Cronograma simplificado com base no Calendário Nacional de Vacinação (Ministério da Saúde), atualizado 2026.
 // É uma visão geral organizacional — não substitui avaliação da equipe de saúde em cada caso.
 const VACCINE_SCHEDULE = {
   'Criança': [
     {key:'bcg', label:'BCG', doses:1},
-    {key:'hepb', label:'Hepatite B', doses:1},
+    {key:'hepb', label:'Hepatite B (dose ao nascer)', doses:1},
     {key:'penta', label:'Penta (DTP + Hib + Hepatite B)', doses:3},
-    {key:'vip', label:'Poliomielite (VIP), com reforços', doses:5},
-    {key:'pneumo10', label:'Pneumocócica 10-valente', doses:3},
-    {key:'rota', label:'Rotavírus', doses:2},
-    {key:'menc', label:'Meningocócica C', doses:2},
-    {key:'menacwy', label:'Meningocócica ACWY', doses:1},
-    {key:'triplice', label:'Tríplice viral (SCR)', doses:2},
-    {key:'dtp_reforco', label:'DTP (reforços)', doses:2},
-    {key:'varicela', label:'Varicela', doses:2},
-    {key:'hepa', label:'Hepatite A', doses:1},
-    {key:'febre_amarela', label:'Febre amarela', doses:2},
+    {key:'rota', label:'Rotavírus humano', doses:2},
+    {key:'pneumo10', label:'Pneumocócica 10-valente (com reforço)', doses:3},
+    {key:'vip', label:'Poliomielite (VIP/VOP, com reforços)', doses:5},
+    {key:'menc', label:'Meningocócica C/ACWY (conjugada, com reforço)', doses:3},
+    {key:'febre_amarela', label:'Febre amarela (dose e reforço)', doses:2},
+    {key:'triplice', label:'Tríplice viral (SCR)', doses:1},
+    {key:'tetraviral', label:'Tetraviral (SCR + Varicela)', doses:1},
+    {key:'varicela', label:'Varicela (dose isolada)', doses:1},
     {key:'covid', label:'Covid-19', doses:3},
-    {key:'hpv', label:'HPV (a partir dos 9 anos)', doses:1},
+    {key:'dtp_reforco', label:'DTP (reforços)', doses:2},
+    {key:'hepa', label:'Hepatite A', doses:1},
+    {key:'hpv', label:'HPV (dose única, 9 a 14 anos)', doses:1},
+    {key:'pneumo23_indigena', label:'Pneumocócica 23V (povos indígenas)', doses:1},
     {key:'influenza', label:'Influenza (dose anual, a partir dos 6 meses)', doses:1}
   ],
   'Adolescente e Jovem': [
