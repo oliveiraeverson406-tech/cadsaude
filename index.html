@@ -13,13 +13,13 @@
 <meta name="apple-mobile-web-app-title" content="CadSaúde">
 <style>
   :root{
-    --ink:#1c2b28;
-    --paper:#f4f7f2;
-    --line:#d7ded1;
-    --accent:#2f6b4f;
-    --accent-dark:#204a37;
-    --danger:#a13e2f;
-    --muted:#5c6b64;
+    --ink:#2b1c1c;
+    --paper:#f7f2f1;
+    --line:#e3cfce;
+    --accent:#b3261e;
+    --accent-dark:#7a1a14;
+    --danger:#8c1d1d;
+    --muted:#6b5c5c;
     --card:#ffffff;
     --warn:#b5730a;
   }
@@ -27,10 +27,11 @@
   html{
     overflow-x:hidden;
     width:100%;
+    font-size:18px;
   }
   body{
     margin:0;
-    font-family:'Segoe UI', Roboto, -apple-system, sans-serif;
+    font-family:Georgia, 'Times New Roman', serif;
     background:var(--paper);
     color:var(--ink);
     padding-bottom:60px;
@@ -94,7 +95,7 @@
     border-radius:7px;
     font-size:0.95rem;
     font-family:inherit;
-    background:#fbfcfa;
+    background:#fdf9f8;
     color:var(--ink);
   }
   input:focus, select:focus{
@@ -131,10 +132,10 @@
   }
   .btn-primary:hover{background:var(--accent-dark);}
   .btn-secondary{
-    background:#eceee7;
+    background:#f0e6e5;
     color:var(--ink);
   }
-  .btn-secondary:hover{background:#dfe3d9;}
+  .btn-secondary:hover{background:#e3d2d0;}
   .search-box{
     position:relative;
     margin-bottom:12px;
@@ -163,7 +164,7 @@
     border-radius:8px;
     padding:12px 14px;
     margin-bottom:10px;
-    background:#fbfcfa;
+    background:#fdf9f8;
   }
   .person-top{
     display:flex;
@@ -187,7 +188,7 @@
   }
   .tag{
     display:inline-block;
-    background:#e3ece5;
+    background:#f5dedc;
     color:var(--accent-dark);
     font-size:0.7rem;
     font-weight:700;
@@ -247,7 +248,7 @@
     flex-direction:column;
     align-items:center;
     gap:3px;
-    background:#fbfcfa;
+    background:#fdf9f8;
     border:1px solid var(--line);
     border-radius:10px;
     padding:8px 2px;
@@ -352,7 +353,7 @@
     margin-top:10px;
   }
   .banner-dot{
-    background:#eef2ec;
+    background:#faeceb;
     border:1px solid var(--line);
     border-radius:20px;
     padding:5px 11px;
@@ -440,7 +441,7 @@
     display:none;
     position:fixed;
     inset:0;
-    background:rgba(28,43,40,0.55);
+    background:rgba(43,28,28,0.55);
     z-index:100;
     align-items:flex-end;
     justify-content:center;
@@ -462,7 +463,7 @@
     position:absolute;
     top:14px;
     right:14px;
-    background:#eceee7;
+    background:#f0e6e5;
     border:none;
     border-radius:50%;
     width:32px;
@@ -497,7 +498,7 @@
     border-radius:8px;
     padding:10px 12px;
     margin-bottom:8px;
-    background:#fbfcfa;
+    background:#fdf9f8;
   }
   .aviso-manage-icon{
     font-size:1.3rem;
@@ -623,7 +624,7 @@
     align-items:center;
     gap:4px;
     font-size:0.76rem;
-    background:#eef2ec;
+    background:#faeceb;
     border:1px solid var(--line);
     border-radius:20px;
     padding:4px 10px;
@@ -705,7 +706,7 @@
     gap:8px;
   }
   .stat-box{
-    background:#fbfcfa;
+    background:#fdf9f8;
     border:1px solid var(--line);
     border-radius:8px;
     padding:10px 12px;
@@ -748,7 +749,7 @@
   .stats-row-count{
     font-weight:700;
     color:var(--accent-dark);
-    background:#e3ece5;
+    background:#f5dedc;
     padding:1px 9px;
     border-radius:20px;
     font-size:0.78rem;
@@ -757,7 +758,7 @@
   }
   .stats-row-count.zero{
     color:var(--muted);
-    background:#eceee7;
+    background:#f0e6e5;
   }
 </style>
 </head>
@@ -792,6 +793,16 @@
     </div>
     <input type="file" id="import-file" accept="application/json">
     <div class="backup-note">O backup (.json) salva tudo e pode ser restaurado depois. Faça isso periodicamente para não depender só do armazenamento do app.</div>
+  </div>
+
+  <div class="card">
+    <h2>Código do app (index.html)</h2>
+    <div class="backup-row">
+      <button type="button" class="btn-secondary" id="export-index-btn">Exportar index.html</button>
+      <label class="btn-secondary" for="import-index-file" id="import-index-btn">Importar index.html</label>
+    </div>
+    <input type="file" id="import-index-file" accept=".html,text/html">
+    <div class="backup-note">"Exportar index.html" baixa o código atual do app — é esse arquivo que você deve anexar quando quiser pedir um ajuste. "Importar index.html" só abre um arquivo .html numa aba nova pra você conferir como ficou antes de subir de verdade no seu repositório — não publica sozinho.</div>
   </div>
 
   <div class="card">
@@ -1012,6 +1023,8 @@ const exportBtn = document.getElementById('export-btn');
 const backupJsonBtn = document.getElementById('backup-json-btn');
 const restoreBtn = document.getElementById('restore-btn');
 const importFile = document.getElementById('import-file');
+const exportIndexBtn = document.getElementById('export-index-btn');
+const importIndexFile = document.getElementById('import-index-file');
 const agePreview = document.getElementById('age-preview');
 
 function showToast(msg){
@@ -1421,7 +1434,7 @@ function render(){
           <div class="person-name">${escapeHtml(p.nome)}${alertBadge}</div>
           <div class="person-details">
             <span class="tag">${p.sexo}</span>
-            <span class="tag age">${calcAge(p.nascimento)} anos · ${ageGroup(p.nascimento)}</span>
+            <span class="tag age">${ageGroup(p.nascimento)}</span>
             Nasc.: ${formatDateBR(p.nascimento)}${p.cpf ? ' · CPF: ' + p.cpf : ''}
           </div>
           <div class="person-details">${condTags}</div>
@@ -1644,6 +1657,42 @@ backupJsonBtn.addEventListener('click', () => {
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   showToast('Backup salvo.');
+});
+
+exportIndexBtn.addEventListener('click', async () => {
+  try{
+    const resposta = await fetch(window.location.href, {cache: 'no-store'});
+    if(!resposta.ok) throw new Error('falha ao baixar');
+    const html = await resposta.text();
+    const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'index.html';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast('index.html baixado.');
+  }catch(err){
+    showToast('Não foi possível baixar o index.html agora. Tente de novo.');
+  }
+});
+
+importIndexFile.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    const html = await file.text();
+    const blob = new Blob([html], {type: 'text/html'});
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    showToast('Abrindo pré-visualização em nova aba.');
+  }catch(err){
+    showToast('Não foi possível abrir esse arquivo.');
+  }
+  importIndexFile.value = '';
 });
 
 importFile.addEventListener('change', async (e) => {
