@@ -897,6 +897,12 @@
   <div class="card">
     <div class="toolbar">
       <h2 style="margin:0;">Pessoas cadastradas <span class="count-badge" id="count-badge"></span></h2>
+      <button type="button" id="toggle-select-btn" class="icon-btn" style="margin-left:auto;">Selecionar</button>
+    </div>
+    <div id="bulk-actions-bar" style="display:none; align-items:center; gap:10px; padding:10px; margin:0 0 10px; background:#fdecea; border:1px solid #f5c6cb; border-radius:8px;">
+      <span id="bulk-count-label" style="font-weight:600;">0 selecionado(s)</span>
+      <button type="button" id="bulk-delete-btn" class="icon-btn del" style="margin-left:auto;">Excluir selecionados</button>
+      <button type="button" id="bulk-cancel-btn" class="icon-btn">Cancelar</button>
     </div>
 
     <div class="list-layout">
@@ -1103,6 +1109,16 @@ function calcAgeMonths(iso){
   if(today.getDate() < birth.getDate()) months--;
   if(months < 0) months = 0;
   return months;
+}
+
+function formatAge(iso){
+  if(!iso) return '';
+  const months = calcAgeMonths(iso);
+  if(months < 24){
+    return months + (months === 1 ? ' mês' : ' meses');
+  }
+  const years = calcAge(iso);
+  return years + (years === 1 ? ' ano' : ' anos');
 }
 
 function ageGroup(iso){
@@ -1443,12 +1459,13 @@ function render(){
     return `
     <div class="${cardClass}">
       <div class="person-top">
+        ${selectionMode ? `<input type="checkbox" class="select-check" data-id="${p.id}" ${selectedIds.has(p.id) ? 'checked' : ''} onchange="toggleSelect('${p.id}', this.checked)" style="width:22px;height:22px;margin-right:8px;">` : ''}
         <div class="person-info">
           <div class="person-name">${escapeHtml(p.nome)}${alertBadge}</div>
           <div class="person-details">
             <span class="tag">${p.sexo}</span>
             <span class="tag age">${ageGroup(p.nascimento)}</span>
-            Nasc.: ${formatDateBR(p.nascimento)}${p.cpf ? ' · CPF: ' + p.cpf : ''}
+            <span style="color:#111111;">Nasc.: ${formatDateBR(p.nascimento)} (${formatAge(p.nascimento)})${p.cpf ? ' · CPF: ' + p.cpf : ''}</span>
           </div>
           <div class="person-details">${condTags}</div>
           ${medTags ? `<div class="person-details">${medTags}</div>` : ''}
@@ -1462,6 +1479,7 @@ function render(){
     </div>
   `;
   }).join('');
+  updateBulkBar();
  } catch(err){
   console.error('Erro ao exibir a lista:', err);
   listContainer.innerHTML = `<div class="empty-state">Ocorreu um erro ao mostrar a lista. Toca em "Restaurar backup" pra recarregar os dados, ou avisa o suporte com esta mensagem: ${escapeHtml(String(err && err.message || err))}</div>`;
@@ -1510,6 +1528,54 @@ window.deletePerson = async function(id){
     showToast('Cadastro excluído.');
   }
 }
+
+let selectionMode = false;
+let selectedIds = new Set();
+
+function updateBulkBar(){
+  const bar = document.getElementById('bulk-actions-bar');
+  const label = document.getElementById('bulk-count-label');
+  if(!bar || !label) return;
+  bar.style.display = selectionMode ? 'flex' : 'none';
+  label.textContent = `${selectedIds.size} selecionado(s)`;
+}
+
+window.toggleSelect = function(id, checked){
+  if(checked) selectedIds.add(id);
+  else selectedIds.delete(id);
+  updateBulkBar();
+}
+
+document.getElementById('toggle-select-btn').addEventListener('click', () => {
+  selectionMode = !selectionMode;
+  selectedIds.clear();
+  document.getElementById('toggle-select-btn').textContent = selectionMode ? 'Selecionando...' : 'Selecionar';
+  render();
+});
+
+document.getElementById('bulk-cancel-btn').addEventListener('click', () => {
+  selectionMode = false;
+  selectedIds.clear();
+  document.getElementById('toggle-select-btn').textContent = 'Selecionar';
+  render();
+});
+
+document.getElementById('bulk-delete-btn').addEventListener('click', async () => {
+  if(selectedIds.size === 0){
+    showToast('Nenhuma pessoa selecionada.');
+    return;
+  }
+  if(!confirm(`Excluir ${selectedIds.size} cadastro(s) selecionado(s)? Essa ação não pode ser desfeita.`)) return;
+  people = people.filter(x => !selectedIds.has(x.id));
+  const ok = await savePeople();
+  if(ok){
+    selectionMode = false;
+    selectedIds.clear();
+    document.getElementById('toggle-select-btn').textContent = 'Selecionar';
+    render();
+    showToast('Cadastros excluídos.');
+  }
+});
 
 cancelEditBtn.addEventListener('click', () => {
   resetForm();
