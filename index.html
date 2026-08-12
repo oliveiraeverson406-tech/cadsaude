@@ -644,12 +644,45 @@
     font-size:0.76rem;
     color:var(--danger);
     font-weight:600;
-    margin-top:2px;
+    margin-top:6px;
     background:#fbe9e6;
     border:1px solid #eab6ac;
     border-radius:6px;
-    padding:4px 8px;
+    padding:8px 10px;
+  }
+  .vaccine-toggle{
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    user-select:none;
+  }
+  .vaccine-toggle .chevron{
     display:inline-block;
+    transition:transform 0.15s ease;
+    font-size:0.7rem;
+  }
+  .vaccine-toggle.open .chevron{
+    transform:rotate(180deg);
+  }
+  .vaccine-placeholder{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:8px;
+    padding:8px 10px;
+    background:#fbf3f2;
+    border:1px solid var(--line);
+    border-radius:6px;
+  }
+  .vaccine-placeholder svg{
+    flex-shrink:0;
+    width:28px;
+    height:28px;
+  }
+  .vaccine-placeholder span{
+    font-size:0.76rem;
+    color:var(--muted);
   }
   .alert-badge{
     display:inline-flex;
@@ -1449,11 +1482,21 @@ function render(){
     let cardClass = 'person';
     if(vstatus){
       const isComplete = vstatus.missing.length === 0;
-      vaccineHtml = `<div class="vaccine-summary ${isComplete ? 'complete' : 'incomplete'}">${vstatus.complete}/${vstatus.total} em dia</div>`;
-      if(!isComplete){
-        vaccineHtml += `<div class="vaccine-missing">⚠️ Faltando: ${escapeHtml(vstatus.missing.join(', '))}</div>`;
+      if(isComplete){
+        vaccineHtml = `<div class="vaccine-summary complete">${vstatus.complete}/${vstatus.total} em dia</div>`;
+      } else {
+        const isOpen = expandedVaccines.has(p.id);
         alertBadge = '<span class="alert-badge">⚠️ Vacina pendente</span>';
         cardClass = 'person has-alert';
+        vaccineHtml = `<div class="vaccine-summary incomplete vaccine-toggle ${isOpen ? 'open' : ''}" onclick="toggleVaccineDetails('${p.id}')">${vstatus.complete}/${vstatus.total} em dia <span class="chevron">▾</span></div>`;
+        if(isOpen){
+          vaccineHtml += `<div class="vaccine-missing">⚠️ Faltando: ${escapeHtml(vstatus.missing.join(', '))}</div>`;
+        } else {
+          vaccineHtml += `<div class="vaccine-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s-7.5-4.7-10-9.3C.3 8.2 2 4.5 5.5 4c2-.3 3.7.7 4.8 2.2C11.4 4.7 13.1 3.7 15.1 4c3.5.5 5.2 4.2 3.5 7.7C16.5 16.3 12 21 12 21z" stroke="#b5453c" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.5 12h2.2l1.3-2.6L11.4 15l1.6-4.5h1l1.1 1.5H18" stroke="#b5453c" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Toca em "${vstatus.complete}/${vstatus.total} em dia" para ver as vacinas pendentes</span>
+          </div>`;
+        }
       }
     }
     return `
@@ -1531,6 +1574,13 @@ window.deletePerson = async function(id){
 
 let selectionMode = false;
 let selectedIds = new Set();
+let expandedVaccines = new Set();
+
+window.toggleVaccineDetails = function(id){
+  if(expandedVaccines.has(id)) expandedVaccines.delete(id);
+  else expandedVaccines.add(id);
+  render();
+};
 
 function updateBulkBar(){
   const bar = document.getElementById('bulk-actions-bar');
