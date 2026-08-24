@@ -68,4 +68,48 @@
     }
     .vazio {
       color: #000;
-      text-a
+      text-align: center;
+      padding: 20px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+
+<a href="index.html" class="voltar">← Voltar ao Painel</a>
+<h1>🩸❤️ Hipertensos e Diabéticos</h1>
+
+<div class="resumo" id="resumo"></div>
+<div id="lista"></div>
+
+<script src="dados.js"></script>
+<script>
+  const pessoas = carregarPessoas();
+  const filtradas = pessoas.filter(p => temCondicao(p, 'diabetico') && temCondicao(p, 'hipertenso'));
+
+  document.getElementById('resumo').textContent = `Total: ${filtradas.length} pessoa(s)`;
+
+  const lista = document.getElementById('lista');
+  if (filtradas.length === 0) {
+    lista.innerHTML = '<div class="vazio">Nenhuma pessoa encontrada nessa categoria.</div>';
+  } else {
+    lista.innerHTML = filtradas.map(p => {
+      const idade = calcularIdade(p.nascimento);
+      const tags = (p.condicoes || []).map(c => {
+        const nomes = { diabetico: 'Diabético', hipertenso: 'Hipertenso', acamado: 'Acamado' };
+        return `<span class="tag tag-${c}">${nomes[c] || c}</span>`;
+      }).join('');
+      return `
+        <div class="card">
+          <b>${p.nome}</b>
+          <div class="pessoa-meta">${formatarData(p.nascimento)} ${idade !== null ? `(${idade} anos)` : ''} · CPF: ${p.cpf || '—'}</div>
+          <div class="tags">${tags}</div>
+          ${p.medicamentos && p.medicamentos.length ? `<div class="pessoa-meta" style="font-weight:500; margin-top:6px;">💊 ${p.medicamentos.join(', ')}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+</script>
+
+</body>
+</html>
