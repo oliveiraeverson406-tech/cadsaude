@@ -192,7 +192,9 @@
       try {
         const dados = JSON.parse(e.target.result);
         console.log('Dados carregados:', dados);
-        alert(`✅ Backup importado!\n\nData: ${dados.data}\nTotal: ${dados.totalGeral}`);
+        const dataBackup = dados.data || 'não informada';
+        const totalBackup = dados.totalGeral !== undefined ? dados.totalGeral : 'não informado';
+        alert(`✅ Backup importado!\n\nData: ${dataBackup}\nTotal: ${totalBackup}`);
       } catch (erro) {
         alert('❌ Arquivo inválido!');
       }
