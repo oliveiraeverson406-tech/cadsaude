@@ -1,4 +1,12 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -58,10 +66,10 @@
       font-size: 16px;
     }
 
-    /* 📅 DATA — 3 CAIXINHAS SEM CALENDÁRIO */
+    /* 📅 AQUI ESTÁ A SEPARAÇÃO — 3 CAIXINHAS */
     .data-linhas {
       display: flex;
-      gap: 6px;
+      gap: 8px;
       align-items: center;
     }
 
@@ -81,7 +89,7 @@
     .separador {
       font-size: 22px;
       font-weight: bold;
-      color: #333;
+      color: #000;
     }
 
     .linha-check {
@@ -131,14 +139,14 @@
     <option>Feminino</option>
   </select>
 
-  <!-- 📅 AQUI ESTÁ A DATA — SEM CALENDÁRIO! -->
+  <!-- 📅 TROCA FEITA AQUI — 3 CAIXINHAS SEPARADAS -->
   <label>Data de nascimento</label>
   <div class="data-linhas">
-    <input type="number" placeholder="Dia" min="1" max="31" class="dia">
+    <input type="text" placeholder="Dia" maxlength="2" class="dia">
     <span class="separador">/</span>
-    <input type="number" placeholder="Mês" min="1" max="12" class="mes">
+    <input type="text" placeholder="Mês" maxlength="2" class="mes">
     <span class="separador">/</span>
-    <input type="number" placeholder="Ano" min="1900" max="2026" class="ano">
+    <input type="text" placeholder="Ano" maxlength="4" class="ano">
   </div>
 
   <label>CPF</label>
@@ -165,6 +173,9 @@
   <button class="btn-salvar">💾 Salvar cadastro</button>
 
 </div>
+
+</body>
+</html>
 
 </body>
 </html>
