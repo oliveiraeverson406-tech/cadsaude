@@ -50,12 +50,35 @@
       font-size: 14px;
     }
 
-    input[type="text"], input[type="date"], select {
+    input[type="text"], input[type="number"], select {
       width: 100%;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 8px;
       font-size: 15px;
+    }
+
+    .linha-data {
+      display: flex;
+      gap: 8px;
+    }
+
+    .linha-data input {
+      text-align: center;
+    }
+
+    .linha-data .campo-dia, .linha-data .campo-mes {
+      flex: 1;
+    }
+
+    .linha-data .campo-ano {
+      flex: 1.4;
+    }
+
+    .ajuda {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
     }
 
     .condicoes {
@@ -147,6 +170,38 @@
       background: #2E7D32;
       color: #fff;
       width: 100%;
+    }
+
+    .mensagem-sucesso {
+      display: none;
+      background: #E8F5E9;
+      border: 2px solid #2E7D32;
+      color: #1B5E20;
+      font-weight: 700;
+      padding: 14px;
+      border-radius: 10px;
+      margin-top: 14px;
+      text-align: center;
+    }
+
+    .mensagem-sucesso.mostrar {
+      display: block;
+    }
+
+    .mensagem-erro {
+      display: none;
+      background: #FFEBEE;
+      border: 2px solid #C62828;
+      color: #B71C1C;
+      font-weight: 700;
+      padding: 14px;
+      border-radius: 10px;
+      margin-top: 14px;
+      text-align: center;
+    }
+
+    .mensagem-erro.mostrar {
+      display: block;
     }
 
     .barra-lista {
@@ -262,7 +317,12 @@
     </select>
 
     <label>Data de nascimento</label>
-    <input type="date" id="nascimento" required>
+    <div class="linha-data">
+      <input type="number" id="diaNasc" class="campo-dia" placeholder="Dia" min="1" max="31" required>
+      <input type="number" id="mesNasc" class="campo-mes" placeholder="Mês" min="1" max="12" required>
+      <input type="number" id="anoNasc" class="campo-ano" placeholder="Ano" min="1900" max="2026" required>
+    </div>
+    <div class="ajuda">Exemplo: 22 / 04 / 1985</div>
 
     <label>CPF</label>
     <input type="text" id="cpf" placeholder="000.000.000-00">
@@ -301,6 +361,9 @@
     </div>
 
     <button type="submit" class="btn btn-salvar">💾 Salvar cadastro</button>
+
+    <div class="mensagem-sucesso" id="msgSucesso">✅ Cadastro salvo com sucesso!</div>
+    <div class="mensagem-erro" id="msgErro">❌ Preencha nome e data de nascimento corretamente.</div>
   </form>
 </div>
 
@@ -331,6 +394,26 @@
   document.getElementById('formCadastro').addEventListener('submit', function (e) {
     e.preventDefault();
 
+    const msgSucesso = document.getElementById('msgSucesso');
+    const msgErro = document.getElementById('msgErro');
+    msgSucesso.classList.remove('mostrar');
+    msgErro.classList.remove('mostrar');
+
+    const nome = document.getElementById('nome').value.trim();
+    const dia = document.getElementById('diaNasc').value;
+    const mes = document.getElementById('mesNasc').value;
+    const ano = document.getElementById('anoNasc').value;
+
+    if (!nome || !dia || !mes || !ano) {
+      msgErro.classList.add('mostrar');
+      msgErro.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const diaFormatado = String(dia).padStart(2, '0');
+    const mesFormatado = String(mes).padStart(2, '0');
+    const nascimento = `${ano}-${mesFormatado}-${diaFormatado}`;
+
     const condicoes = [];
     if (document.getElementById('chkDiabetico').checked) condicoes.push('diabetico');
     if (document.getElementById('chkHipertenso').checked) condicoes.push('hipertenso');
@@ -348,9 +431,9 @@
 
     const pessoa = {
       id: gerarId(),
-      nome: document.getElementById('nome').value.trim(),
+      nome: nome,
       sexo: document.getElementById('sexo').value,
-      nascimento: document.getElementById('nascimento').value,
+      nascimento: nascimento,
       cpf: document.getElementById('cpf').value.trim(),
       condicoes: condicoes,
       medicamentos: medicamentos,
@@ -369,6 +452,9 @@
     this.reset();
     atualizarQuadros();
     atualizarTela();
+
+    msgSucesso.classList.add('mostrar');
+    msgSucesso.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 
   function alternarModoSelecao() {
