@@ -1,17 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
-  <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cadastro de Usuários</title>
+  <title>Painel de Saúde</title>
   <style>
     * {
       margin: 0;
@@ -23,159 +15,153 @@
     body {
       background-color: #91BED9;
       min-height: 100vh;
-      padding: 30px 20px;
-    }
-
-    .voltar {
-      display: inline-block;
-      color: #000;
-      font-size: 18px;
-      text-decoration: none;
-      margin-bottom: 20px;
-      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
     }
 
     h1 {
-      color: #000;
-      font-size: 26px;
+      color: #000000;
+      font-size: 28px;
       margin-bottom: 30px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.15);
     }
 
-    .cartao {
-      background: #fff;
-      border-radius: 16px;
-      padding: 25px;
-      max-width: 420px;
-      margin: 0 auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    label {
-      display: block;
-      color: #000;
-      font-weight: 600;
-      margin: 18px 0 8px;
-      font-size: 16px;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-
-    /* 📅 AQUI ESTÁ A SEPARAÇÃO — 3 CAIXINHAS */
-    .data-linhas {
+    /* 📦 Botões de Backup */
+    .botoes-backup {
       display: flex;
-      gap: 8px;
-      align-items: center;
+      gap: 12px;
+      margin-bottom: 50px;
     }
 
-    .dia, .mes, .ano {
-      width: auto;
-      padding: 12px 8px;
-      border: 1px solid #999;
-      border-radius: 8px;
-      font-size: 16px;
-      text-align: center;
-    }
-
-    .dia { width: 80px; }
-    .mes { width: 80px; }
-    .ano { width: 110px; }
-
-    .separador {
-      font-size: 22px;
-      font-weight: bold;
-      color: #000;
-    }
-
-    .linha-check {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-
-    .linha-check label {
-      width: auto;
-      margin: 0;
-      font-weight: normal;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-salvar {
-      width: 100%;
-      padding: 15px;
-      background: #2E7D32;
-      color: white;
+    .btn-backup {
+      padding: 10px 20px;
+      background: #FFFFFF;
+      color: #000000;
       border: none;
       border-radius: 8px;
-      font-size: 18px;
-      font-weight: bold;
-      margin-top: 30px;
+      font-size: 15px;
+      font-weight: 600;
       cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: transform 0.2s;
+    }
+
+    .btn-backup:hover {
+      transform: scale(1.03);
+    }
+
+    .btn-backup:nth-child(1) {
+      background: #E8F5E9;
+      color: #2E7D32;
+    }
+
+    .btn-backup:nth-child(2) {
+      background: #E3F2FD;
+      color: #1565C0;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    /* 📊 Grade dos Ícones */
+    .grade-icones {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      max-width: 900px;
+    }
+
+    .item-icone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.2s;
+    }
+
+    .item-icone:hover {
+      transform: scale(1.05);
+    }
+
+    /* ⚫ Círculo Preto com ícone dentro */
+    .circulo {
+      width: 90px;
+      height: 90px;
+      background-color: #000000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+    }
+
+    /* ⬇️ LETRAS ABAIXO — AGORA PRETAS */
+    .rotulo {
+      color: #000000; /* ← PRETO! */
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.3;
     }
   </style>
 </head>
 <body>
 
-<a href="index.html" class="voltar">← Voltar ao Painel</a>
+<h1>Painel de Saúde</h1>
 
-<h1>👤 Cadastro de Usuários</h1>
+<!-- 📦 Botões de Backup -->
+<div class="botoes-backup">
+  <button class="btn-backup" onclick="exportarBackup()">📤 Exportar Backup</button>
+  <label class="btn-backup">
+    📥 Importar Backup
+    <input type="file" accept=".json" onchange="importarBackup(event)">
+  </label>
+</div>
 
-<div class="cartao">
+<!-- 📊 6 ÍCONES -->
+<div class="grade-icones">
 
-  <label>Nome completo</label>
-  <input type="text" placeholder="Digite o nome">
+  <a href="total-geral.html" class="item-icone">
+    <div class="circulo">👥</div>
+    <div class="rotulo">Total Geral</div>
+  </a>
 
-  <label>Sexo</label>
-  <select>
-    <option>Masculino</option>
-    <option>Feminino</option>
-  </select>
+  <a href="cadastros.html" class="item-icone">
+    <div class="circulo">👤</div>
+    <div class="rotulo">Cadastro de<br>usuários</div>
+  </a>
 
-  <!-- 📅 TROCA FEITA AQUI — 3 CAIXINHAS SEPARADAS -->
-  <label>Data de nascimento</label>
-  <div class="data-linhas">
-    <input type="text" placeholder="Dia" maxlength="2" class="dia">
-    <span class="separador">/</span>
-    <input type="text" placeholder="Mês" maxlength="2" class="mes">
-    <span class="separador">/</span>
-    <input type="text" placeholder="Ano" maxlength="4" class="ano">
-  </div>
+  <a href="hipertensos.html" class="item-icone">
+    <div class="circulo">❤️</div>
+    <div class="rotulo">Hipertensos</div>
+  </a>
 
-  <label>CPF</label>
-  <input type="text" placeholder="000.000.000-00">
+  <a href="diabeticos.html" class="item-icone">
+    <div class="circulo">🩸</div>
+    <div class="rotulo">Diabéticos</div>
+  </a>
 
-  <label>Condições de saúde</label>
-  <div class="linha-check">
-    <label><input type="checkbox"> Diabético</label>
-    <label><input type="checkbox"> Hipertenso</label>
-    <label><input type="checkbox"> Acamado</label>
-  </div>
+  <a href="ambos.html" class="item-icone">
+    <div class="circulo">🩸❤️</div>
+    <div class="rotulo">Hipertensos e<br>Diabéticos</div>
+  </a>
 
-  <label>Outros medicamentos</label>
-  <input type="text" placeholder="Separe por vírgula">
-
-  <label>Vacinas em dia</label>
-  <div class="linha-check">
-    <label><input type="checkbox"> Febre amarela</label>
-    <label><input type="checkbox"> Covid-19</label>
-    <label><input type="checkbox"> HPV</label>
-    <label><input type="checkbox"> Influenza</label>
-  </div>
-
-  <button class="btn-salvar">💾 Salvar cadastro</button>
+  <a href="acamados.html" class="item-icone">
+    <div class="circulo">🛏️</div>
+    <div class="rotulo">Acamados</div>
+  </a>
 
 </div>
 
-</body>
-</html>
+<!-- ⚙️ FUNÇÕES DE BACKUP -->
+<script src="dados.js"></script>
 
 </body>
 </html>
