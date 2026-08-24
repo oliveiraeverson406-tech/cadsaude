@@ -65,4 +65,49 @@
     <div class="rotulo">Total de pessoas</div>
   </div>
   <div class="card">
-    <div class="numero" id="numCriancas"
+    <div class="numero" id="numCriancas">0</div>
+    <div class="rotulo">Crianças (0–17 anos)</div>
+  </div>
+  <div class="card">
+    <div class="numero" id="numAdultos">0</div>
+    <div class="rotulo">Adultos (18–59 anos)</div>
+  </div>
+  <div class="card">
+    <div class="numero" id="numIdosos">0</div>
+    <div class="rotulo">Idosos (60+ anos)</div>
+  </div>
+  <div class="card">
+    <div class="numero" id="numHipertensos">0</div>
+    <div class="rotulo">Hipertensos</div>
+  </div>
+  <div class="card">
+    <div class="numero" id="numDiabeticos">0</div>
+    <div class="rotulo">Diabéticos</div>
+  </div>
+  <div class="card">
+    <div class="numero" id="numAmbos">0</div>
+    <div class="rotulo">Hipertensos e Diabéticos</div>
+  </div>
+  <div class="card">
+    <div class="numero" id="numAcamados">0</div>
+    <div class="rotulo">Acamados</div>
+  </div>
+</div>
+
+<script src="dados.js"></script>
+<script>
+  const pessoas = carregarPessoas();
+  const totais = calcularTotais(pessoas);
+
+  document.getElementById('numTotal').textContent = totais.totalGeral;
+  document.getElementById('numCriancas').textContent = totais.criancas;
+  document.getElementById('numAdultos').textContent = totais.adultos;
+  document.getElementById('numIdosos').textContent = totais.idosos;
+  document.getElementById('numHipertensos').textContent = totais.hipertensos;
+  document.getElementById('numDiabeticos').textContent = totais.diabeticos;
+  document.getElementById('numAmbos').textContent = totais.ambos;
+  document.getElementById('numAcamados').textContent = totais.acamados;
+</script>
+
+</body>
+</html>
