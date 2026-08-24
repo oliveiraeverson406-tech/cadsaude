@@ -29,7 +29,6 @@
       text-shadow: 0 2px 4px rgba(0,0,0,0.15);
     }
 
-    /* 📦 Botões de Backup */
     .botoes-backup {
       display: flex;
       gap: 12px;
@@ -67,7 +66,6 @@
       display: none;
     }
 
-    /* 📊 Grade dos Ícones */
     .grade-icones {
       display: flex;
       flex-wrap: wrap;
@@ -90,7 +88,6 @@
       transform: scale(1.05);
     }
 
-    /* ⚫ Círculo Preto com ícone dentro */
     .circulo {
       width: 90px;
       height: 90px;
@@ -102,9 +99,8 @@
       font-size: 36px;
     }
 
-    /* ⬇️ LETRAS ABAIXO — AGORA PRETAS */
     .rotulo {
-      color: #000000; /* ← PRETO! */
+      color: #000000;
       font-size: 16px;
       font-weight: 700;
       text-align: center;
@@ -116,7 +112,6 @@
 
 <h1>Painel de Saúde</h1>
 
-<!-- 📦 Botões de Backup -->
 <div class="botoes-backup">
   <button class="btn-backup" onclick="exportarBackup()">📤 Exportar Backup</button>
   <label class="btn-backup">
@@ -125,7 +120,6 @@
   </label>
 </div>
 
-<!-- 📊 6 ÍCONES -->
 <div class="grade-icones">
 
   <a href="total-geral.html" class="item-icone">
@@ -161,47 +155,7 @@
 </div>
 
 <!-- ⚙️ FUNÇÕES DE BACKUP -->
-<script>
-  function exportarBackup() {
-    const dados = {
-      data: new Date().toLocaleString('pt-BR'),
-      totalGeral: 215,
-      criancas: 50,
-      adultos: 142,
-      idosos: 23,
-      diabeticos: 0,
-      hipertensos: 2,
-      ambos: 0,
-      acamados: 0
-    };
-
-    const arquivo = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(arquivo);
-    link.download = `backup-saude-${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
-    link.click();
-    alert('✅ Backup exportado com sucesso!');
-  }
-
-  function importarBackup(event) {
-    const arquivo = event.target.files[0];
-    if (!arquivo) return;
-
-    const leitor = new FileReader();
-    leitor.onload = function(e) {
-      try {
-        const dados = JSON.parse(e.target.result);
-        console.log('Dados carregados:', dados);
-        const dataBackup = dados.data || 'não informada';
-        const totalBackup = dados.totalGeral !== undefined ? dados.totalGeral : 'não informado';
-        alert(`✅ Backup importado!\n\nData: ${dataBackup}\nTotal: ${totalBackup}`);
-      } catch (erro) {
-        alert('❌ Arquivo inválido!');
-      }
-    };
-    leitor.readAsText(arquivo);
-  }
-</script>
+<script src="dados.js"></script>
 
 </body>
 </html>

@@ -1,0 +1,128 @@
+/* 📁 dados.js — lógica compartilhada do Painel de Saúde */
+
+const CHAVE_STORAGE = 'cadastroPessoasSaude';
+
+function carregarPessoas() {
+  const dados = localStorage.getItem(CHAVE_STORAGE);
+  if (!dados) return [];
+  try {
+    return JSON.parse(dados);
+  } catch (e) {
+    return [];
+  }
+}
+
+function salvarPessoas(pessoas) {
+  localStorage.setItem(CHAVE_STORAGE, JSON.stringify(pessoas));
+}
+
+function gerarId() {
+  return 'p_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+}
+
+function calcularIdade(nascimento) {
+  if (!nascimento) return null;
+  const hoje = new Date();
+  const nasc = new Date(nascimento);
+  let idade = hoje.getFullYear() - nasc.getFullYear();
+  const m = hoje.getMonth() - nasc.getMonth();
+  if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) {
+    idade--;
+  }
+  return idade;
+}
+
+function formatarData(nascimento) {
+  if (!nascimento) return '';
+  const [ano, mes, dia] = nascimento.split('-');
+  return `${dia}/${mes}/${ano}`;
+}
+
+function temCondicao(pessoa, condicao) {
+  return Array.isArray(pessoa.condicoes) && pessoa.condicoes.includes(condicao);
+}
+
+function calcularTotais(pessoas) {
+  const totais = {
+    totalGeral: pessoas.length,
+    criancas: 0,
+    adultos: 0,
+    idosos: 0,
+    diabeticos: 0,
+    hipertensos: 0,
+    ambos: 0,
+    acamados: 0
+  };
+
+  pessoas.forEach(p => {
+    const idade = calcularIdade(p.nascimento);
+    if (idade !== null) {
+      if (idade < 18) totais.criancas++;
+      else if (idade < 60) totais.adultos++;
+      else totais.idosos++;
+    }
+
+    const diabetico = temCondicao(p, 'diabetico');
+    const hipertenso = temCondicao(p, 'hipertenso');
+    const acamado = temCondicao(p, 'acamado');
+
+    if (diabetico && hipertenso) totais.ambos++;
+    else if (diabetico) totais.diabeticos++;
+    else if (hipertenso) totais.hipertensos++;
+
+    if (acamado) totais.acamados++;
+  });
+
+  return totais;
+}
+
+function exportarBackup() {
+  const pessoas = carregarPessoas();
+  const backup = {
+    tipo: 'backup-cadastro-pessoas',
+    geradoEm: new Date().toISOString(),
+    pessoas: pessoas
+  };
+
+  const arquivo = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(arquivo);
+  link.download = `backup-cadastro-pessoas-${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
+  link.click();
+
+  const totais = calcularTotais(pessoas);
+  alert(`✅ Backup exportado com sucesso!\n\nTotal de pessoas: ${totais.totalGeral}`);
+}
+
+function importarBackup(event) {
+  const arquivo = event.target.files[0];
+  if (!arquivo) return;
+
+  const leitor = new FileReader();
+  leitor.onload = function (e) {
+    try {
+      const dados = JSON.parse(e.target.result);
+
+      if (!dados.pessoas || !Array.isArray(dados.pessoas)) {
+        alert('❌ Arquivo inválido! Esse arquivo não é um backup de cadastro de pessoas.');
+        return;
+      }
+
+      salvarPessoas(dados.pessoas);
+
+      const dataBackup = dados.geradoEm
+        ? new Date(dados.geradoEm).toLocaleString('pt-BR')
+        : 'não informada';
+      const totalBackup = dados.pessoas.length;
+
+      alert(`✅ Backup importado!\n\nData: ${dataBackup}\nTotal: ${totalBackup}`);
+
+      if (typeof atualizarTela === 'function') {
+        atualizarTela();
+      }
+    } catch (erro) {
+      alert('❌ Arquivo inválido!');
+    }
+  };
+  leitor.readAsText(arquivo);
+}

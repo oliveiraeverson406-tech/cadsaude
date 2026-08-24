@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Total Geral</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body {
+      background-color: #91BED9;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .voltar {
+      display: inline-block;
+      color: #000;
+      text-decoration: none;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+    h1 {
+      color: #000;
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .card .numero {
+      font-size: 32px;
+      font-weight: 800;
+      color: #000;
+    }
+    .card .rotulo {
+      font-size: 14px;
+      font-weight: 600;
+      color: #444;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<a href="index.html" class="voltar">← Voltar ao Painel</a>
+<h1>👥 Total Geral</h1>
+
+<div class="grid">
+  <div class="card">
+    <div class="numero" id="numTotal">0</div>
+    <div class="rotulo">Total de pessoas</div>
+  </div>
+  <div class="card">
+    <div class="numero" id="numCriancas"
