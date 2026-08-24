@@ -1,6 +1,13 @@
-const CACHE_NAME = 'cadsaude-cache-v22';
+const CACHE_NAME = 'cadsaude-cache-v23';
 const FILES_TO_CACHE = [
   './index.html',
+  './cadastros.html',
+  './hipertensos.html',
+  './diabeticos.html',
+  './ambos.html',
+  './acamados.html',
+  './total-geral.html',
+  './dados.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
@@ -24,8 +31,6 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request);
-    })
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
