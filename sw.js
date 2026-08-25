@@ -1,4 +1,4 @@
-const CACHE_NAME = 'meu-site-v5';
+const CACHE_NAME = 'meu-site-v6';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
