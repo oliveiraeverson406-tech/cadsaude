@@ -1,9 +1,17 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cadastro de Usuários</title>
+  <title>Painel de Saúde</title>
   <style>
     * {
       margin: 0;
@@ -15,629 +23,156 @@
     body {
       background-color: #91BED9;
       min-height: 100vh;
-      padding: 20px;
-    }
-
-    .voltar {
-      display: inline-block;
-      color: #000;
-      text-decoration: none;
-      font-weight: 700;
-      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
     }
 
     h1 {
-      color: #000;
-      font-size: 24px;
-      margin-bottom: 20px;
+      color: #000000;
+      font-size: 28px;
+      margin-bottom: 30px;
       text-shadow: 0 2px 4px rgba(0,0,0,0.15);
     }
 
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-    }
-
-    label {
-      display: block;
-      font-weight: 700;
-      margin-top: 12px;
-      margin-bottom: 4px;
-      color: #000;
-      font-size: 14px;
-    }
-
-    input[type="text"], input[type="number"], select {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 15px;
-    }
-
-    .linha-data {
+    /* 📦 Botões de Backup */
+    .botoes-backup {
       display: flex;
-      gap: 8px;
-    }
-
-    .linha-data input {
-      text-align: center;
-    }
-
-    .linha-data .campo-dia, .linha-data .campo-mes {
-      flex: 1;
-    }
-
-    .linha-data .campo-ano {
-      flex: 1.4;
-    }
-
-    .ajuda {
-      font-size: 12px;
-      color: #666;
-      margin-top: 4px;
-    }
-
-    .condicoes {
-      display: flex;
-      flex-wrap: wrap;
       gap: 12px;
-      margin-top: 8px;
+      margin-bottom: 50px;
     }
 
-    .condicoes label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 600;
-      margin-top: 0;
-    }
-
-    .quadro-medicamentos {
-      display: none;
-      border-radius: 10px;
-      padding: 12px;
-      margin-top: 12px;
-    }
-
-    .quadro-medicamentos.ativo {
-      display: block;
-    }
-
-    .quadro-hipertensao {
-      background: #E3F2FD;
-      border: 1px solid #1565C0;
-    }
-
-    .quadro-hipertensao h3 {
-      color: #1565C0;
-      font-size: 15px;
-      margin-bottom: 8px;
-    }
-
-    .quadro-diabetes {
-      background: #FFEBEE;
-      border: 1px solid #C62828;
-    }
-
-    .quadro-diabetes h3 {
-      color: #C62828;
-      font-size: 15px;
-      margin-bottom: 8px;
-    }
-
-    .med-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 500;
-      font-size: 14px;
-      margin-bottom: 6px;
-    }
-
-    .quadro-vacinas {
-      background: #F1F8E9;
-      border: 1px solid #558B2F;
-      border-radius: 10px;
-      padding: 12px;
-      margin-top: 8px;
-    }
-
-    .quadro-vacinas h3 {
-      color: #33691E;
-      font-size: 15px;
-      margin-bottom: 4px;
-    }
-
-    .faixa-etaria-label {
-      font-size: 12px;
-      color: #33691E;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .vacinas-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 6px;
-    }
-
-    .vacina-item {
-      background: #fff;
-      border: 1px solid #A5D6A7;
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .vacinas-vazio {
-      font-size: 13px;
-      color: #666;
-      font-style: italic;
-    }
-
-    .btn {
-      padding: 12px 24px;
+    .btn-backup {
+      padding: 10px 20px;
+      background: #FFFFFF;
+      color: #000000;
       border: none;
       border-radius: 8px;
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
-      margin-top: 18px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: transform 0.2s;
     }
 
-    .btn-salvar {
-      background: #2E7D32;
-      color: #fff;
-      width: 100%;
+    .btn-backup:hover {
+      transform: scale(1.03);
     }
 
-    .mensagem-sucesso {
-      display: none;
+    .btn-backup:nth-child(1) {
       background: #E8F5E9;
-      border: 2px solid #2E7D32;
-      color: #1B5E20;
-      font-weight: 700;
-      padding: 14px;
-      border-radius: 10px;
-      margin-top: 14px;
-      text-align: center;
+      color: #2E7D32;
     }
 
-    .mensagem-sucesso.mostrar {
-      display: block;
+    .btn-backup:nth-child(2) {
+      background: #E3F2FD;
+      color: #1565C0;
     }
 
-    .mensagem-erro {
+    input[type="file"] {
       display: none;
-      background: #FFEBEE;
-      border: 2px solid #C62828;
-      color: #B71C1C;
-      font-weight: 700;
-      padding: 14px;
-      border-radius: 10px;
-      margin-top: 14px;
-      text-align: center;
     }
 
-    .mensagem-erro.mostrar {
-      display: block;
-    }
-
-    .barra-lista {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .barra-lista h2 {
-      color: #000;
-      font-size: 18px;
-    }
-
-    .btn-selecionar, .btn-excluir-sel {
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: none;
-      font-weight: 700;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .btn-selecionar {
-      background: #FFF3E0;
-      color: #E65100;
-    }
-
-    .btn-excluir-sel {
-      background: #FFEBEE;
-      color: #C62828;
-      margin-left: 8px;
-    }
-
-    .pessoa-card {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    .pessoa-info b {
-      font-size: 16px;
-      color: #000;
-    }
-
-    .pessoa-meta {
-      color: #000;
-      font-weight: 700;
-      font-size: 13px;
-      margin-top: 4px;
-    }
-
-    .tags {
-      margin-top: 8px;
+    /* 📊 Grade dos Ícones */
+    .grade-icones {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      justify-content: center;
+      gap: 30px;
+      max-width: 900px;
     }
 
-    .tag {
-      font-size: 12px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 6px;
-    }
-
-    .tag-diabetico { background: #FFEBEE; color: #C62828; }
-    .tag-hipertenso { background: #E3F2FD; color: #1565C0; }
-    .tag-acamado { background: #ECEFF1; color: #37474F; }
-
-    .checkbox-sel {
-      width: 20px;
-      height: 20px;
-      display: none;
-    }
-
-    .modo-selecao .checkbox-sel {
-      display: block;
-    }
-
-    .btn-excluir-um {
-      background: none;
-      border: none;
-      color: #C62828;
-      font-weight: 700;
-      font-size: 13px;
+    .item-icone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
       cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.2s;
     }
 
-    .vazio {
-      color: #000;
+    .item-icone:hover {
+      transform: scale(1.05);
+    }
+
+    /* ⚫ Círculo Preto com ícone dentro */
+    .circulo {
+      width: 90px;
+      height: 90px;
+      background-color: #000000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+    }
+
+    /* ⬇️ LETRAS ABAIXO — AGORA PRETAS */
+    .rotulo {
+      color: #000000; /* ← PRETO! */
+      font-size: 16px;
+      font-weight: 700;
       text-align: center;
-      padding: 20px;
-      opacity: 0.7;
+      line-height: 1.3;
     }
   </style>
 </head>
 <body>
 
-<a href="index.html" class="voltar">← Voltar ao Painel</a>
-<h1>👤 Cadastro de Usuários</h1>
+<h1>Painel de Saúde</h1>
 
-<div class="card">
-  <form id="formCadastro">
-    <label>Nome completo</label>
-    <input type="text" id="nome" required>
-
-    <label>Sexo</label>
-    <select id="sexo">
-      <option value="Masculino">Masculino</option>
-      <option value="Feminino">Feminino</option>
-    </select>
-
-    <label>Data de nascimento</label>
-    <div class="linha-data">
-      <input type="number" id="diaNasc" class="campo-dia" placeholder="Dia" min="1" max="31" required>
-      <input type="number" id="mesNasc" class="campo-mes" placeholder="Mês" min="1" max="12" required>
-      <input type="number" id="anoNasc" class="campo-ano" placeholder="Ano" min="1900" max="2026" required>
-    </div>
-    <div class="ajuda">Exemplo: 22 / 04 / 1985</div>
-
-    <label>CPF</label>
-    <input type="text" id="cpf" placeholder="000.000.000-00">
-
-    <label>Condições de saúde</label>
-    <div class="condicoes">
-      <label><input type="checkbox" id="chkDiabetico"> Diabético</label>
-      <label><input type="checkbox" id="chkHipertenso"> Hipertenso</label>
-      <label><input type="checkbox" id="chkAcamado"> Acamado</label>
-    </div>
-
-    <div class="quadro-medicamentos quadro-hipertensao" id="quadroHipertensao">
-      <h3>💊 Medicamentos — Hipertensão</h3>
-      <label class="med-item"><input type="checkbox" value="Captopril"> Captopril</label>
-      <label class="med-item"><input type="checkbox" value="Anlodipino 5mg"> Anlodipino 5 mg</label>
-      <label class="med-item"><input type="checkbox" value="Anlodipino 10mg"> Anlodipino 10 mg</label>
-      <label class="med-item"><input type="checkbox" value="Losartana"> Losartana</label>
-      <label class="med-item"><input type="checkbox" value="Hidroclorotiazida 25mg"> Hidroclorotiazida 25 mg</label>
-      <label class="med-item"><input type="checkbox" value="AAS"> AAS</label>
-    </div>
-
-    <div class="quadro-medicamentos quadro-diabetes" id="quadroDiabetes">
-      <h3>💊 Medicamentos — Diabetes</h3>
-      <label class="med-item"><input type="checkbox" value="Metformina 500mg"> Metformina 500 mg</label>
-      <label class="med-item"><input type="checkbox" value="Metformina 850mg"> Metformina 850 mg</label>
-      <label class="med-item"><input type="checkbox" value="Glibenclamida 5mg"> Glibenclamida 5 mg</label>
-    </div>
-
-    <label>Outros medicamentos</label>
-    <input type="text" id="outrosMedicamentos" placeholder="Separe por vírgula">
-
-    <label>Vacinas em dia</label>
-    <div class="quadro-vacinas">
-      <h3>💉 Cartão de Vacinas</h3>
-      <div class="faixa-etaria-label" id="faixaEtariaLabel">Preencha a data de nascimento para ver as vacinas dessa faixa etária.</div>
-      <div class="vacinas-grid" id="vacinasGrid"></div>
-    </div>
-
-    <button type="submit" class="btn btn-salvar">💾 Salvar cadastro</button>
-
-    <div class="mensagem-sucesso" id="msgSucesso">✅ Cadastro salvo com sucesso!</div>
-    <div class="mensagem-erro" id="msgErro">❌ Preencha nome e data de nascimento corretamente.</div>
-  </form>
+<!-- 📦 Botões de Backup -->
+<div class="botoes-backup">
+  <button class="btn-backup" onclick="exportarBackup()">📤 Exportar Backup</button>
+  <label class="btn-backup">
+    📥 Importar Backup
+    <input type="file" accept=".json" onchange="importarBackup(event)">
+  </label>
 </div>
 
-<div class="card" id="areaLista">
-  <div class="barra-lista">
-    <h2>Pessoas cadastradas (<span id="contadorPessoas">0</span>)</h2>
-    <div>
-      <button class="btn-selecionar" id="btnSelecionar" onclick="alternarModoSelecao()">Selecionar</button>
-      <button class="btn-excluir-sel" id="btnExcluirSel" onclick="excluirSelecionadas()" style="display:none;">Excluir selecionadas</button>
-    </div>
-  </div>
-  <div id="listaPessoas"></div>
+<!-- 📊 6 ÍCONES -->
+<div class="grade-icones">
+
+  <a href="total-geral.html" class="item-icone">
+    <div class="circulo">👥</div>
+    <div class="rotulo">Total Geral</div>
+  </a>
+
+  <a href="cadastros.html" class="item-icone">
+    <div class="circulo">👤</div>
+    <div class="rotulo">Cadastro de<br>usuários</div>
+  </a>
+
+  <a href="hipertensos.html" class="item-icone">
+    <div class="circulo">❤️</div>
+    <div class="rotulo">Hipertensos</div>
+  </a>
+
+  <a href="diabeticos.html" class="item-icone">
+    <div class="circulo">🩸</div>
+    <div class="rotulo">Diabéticos</div>
+  </a>
+
+  <a href="ambos.html" class="item-icone">
+    <div class="circulo">🩸❤️</div>
+    <div class="rotulo">Hipertensos e<br>Diabéticos</div>
+  </a>
+
+  <a href="acamados.html" class="item-icone">
+    <div class="circulo">🛏️</div>
+    <div class="rotulo">Acamados</div>
+  </a>
+
 </div>
 
+<!-- ⚙️ FUNÇÕES DE BACKUP -->
 <script src="dados.js"></script>
-<script>
-  let modoSelecao = false;
-  let selecionadas = new Set();
 
-  // 💉 Vacinas por faixa etária, conforme Calendário Nacional de Vacinação (Ministério da Saúde, 2026)
-  const VACINAS_POR_FAIXA = {
-    crianca: {
-      label: 'Criança (0 a 9 anos)',
-      vacinas: [
-        'BCG', 'Hepatite B', 'Penta (DTP+Hib+HB)', 'Poliomielite (VIP)',
-        'Rotavírus', 'Pneumocócica 10/20-valente', 'Meningocócica C',
-        'Meningocócica ACWY', 'Influenza', 'Covid-19', 'Febre amarela',
-        'Tríplice viral (SCR)', 'DTP (reforço)', 'Varicela', 'Hepatite A', 'HPV'
-      ]
-    },
-    adolescente: {
-      label: 'Adolescente e Jovem (10 a 24 anos)',
-      vacinas: [
-        'HPV', 'Hepatite B', 'Febre amarela', 'Tríplice viral (SCR)',
-        'Varicela', 'Pneumocócica 20-valente', 'Dengue', 'Meningocócica ACWY', 'dT'
-      ]
-    },
-    adulto: {
-      label: 'Adulto (25 a 59 anos)',
-      vacinas: [
-        'Hepatite B', 'dT (difteria e tétano)', 'Febre amarela',
-        'Tríplice viral (SCR)', 'Varicela', 'Pneumocócica 20-valente'
-      ]
-    },
-    idoso: {
-      label: 'Idoso (60 anos ou mais)',
-      vacinas: [
-        'Hepatite B', 'dT (difteria e tétano)', 'Febre amarela',
-        'Tríplice viral (SCR)', 'Varicela', 'Pneumocócica 20-valente',
-        'Influenza', 'Covid-19'
-      ]
-    }
-  };
-
-  function obterFaixaEtaria(idade) {
-    if (idade < 10) return 'crianca';
-    if (idade < 25) return 'adolescente';
-    if (idade < 60) return 'adulto';
-    return 'idoso';
-  }
-
-  function atualizarVacinas() {
-    const dia = document.getElementById('diaNasc').value;
-    const mes = document.getElementById('mesNasc').value;
-    const ano = document.getElementById('anoNasc').value;
-    const grid = document.getElementById('vacinasGrid');
-    const label = document.getElementById('faixaEtariaLabel');
-
-    if (!dia || !mes || !ano) {
-      grid.innerHTML = '';
-      label.textContent = 'Preencha a data de nascimento para ver as vacinas dessa faixa etária.';
-      return;
-    }
-
-    const nascimento = `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-    const idade = calcularIdade(nascimento);
-
-    if (idade === null || idade < 0) {
-      grid.innerHTML = '';
-      label.textContent = 'Data de nascimento inválida.';
-      return;
-    }
-
-    const faixa = obterFaixaEtaria(idade);
-    const dados = VACINAS_POR_FAIXA[faixa];
-
-    label.textContent = `${dados.label} — marque as doses já tomadas`;
-    grid.innerHTML = dados.vacinas.map(v => `
-      <label class="vacina-item">
-        <input type="checkbox" value="${v}"> ${v}
-      </label>
-    `).join('');
-  }
-
-  ['diaNasc', 'mesNasc', 'anoNasc'].forEach(id => {
-    document.getElementById(id).addEventListener('input', atualizarVacinas);
-  });
-
-  document.getElementById('chkDiabetico').addEventListener('change', atualizarQuadros);
-  document.getElementById('chkHipertenso').addEventListener('change', atualizarQuadros);
-
-  function atualizarQuadros() {
-    document.getElementById('quadroDiabetes').classList.toggle('ativo', document.getElementById('chkDiabetico').checked);
-    document.getElementById('quadroHipertensao').classList.toggle('ativo', document.getElementById('chkHipertenso').checked);
-  }
-
-  document.getElementById('formCadastro').addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const msgSucesso = document.getElementById('msgSucesso');
-    const msgErro = document.getElementById('msgErro');
-    msgSucesso.classList.remove('mostrar');
-    msgErro.classList.remove('mostrar');
-
-    const nome = document.getElementById('nome').value.trim();
-    const dia = document.getElementById('diaNasc').value;
-    const mes = document.getElementById('mesNasc').value;
-    const ano = document.getElementById('anoNasc').value;
-
-    if (!nome || !dia || !mes || !ano) {
-      msgErro.classList.add('mostrar');
-      msgErro.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
-
-    const diaFormatado = String(dia).padStart(2, '0');
-    const mesFormatado = String(mes).padStart(2, '0');
-    const nascimento = `${ano}-${mesFormatado}-${diaFormatado}`;
-
-    const condicoes = [];
-    if (document.getElementById('chkDiabetico').checked) condicoes.push('diabetico');
-    if (document.getElementById('chkHipertenso').checked) condicoes.push('hipertenso');
-    if (document.getElementById('chkAcamado').checked) condicoes.push('acamado');
-
-    const medicamentos = [];
-    document.querySelectorAll('.quadro-medicamentos input[type="checkbox"]:checked').forEach(chk => {
-      medicamentos.push(chk.value);
-    });
-
-    const outros = document.getElementById('outrosMedicamentos').value.trim();
-    if (outros) {
-      outros.split(',').forEach(m => medicamentos.push(m.trim()));
-    }
-
-    const vacinas = [];
-    document.querySelectorAll('#vacinasGrid input[type="checkbox"]:checked').forEach(chk => {
-      vacinas.push(chk.value);
-    });
-
-    const pessoa = {
-      id: gerarId(),
-      nome: nome,
-      sexo: document.getElementById('sexo').value,
-      nascimento: nascimento,
-      cpf: document.getElementById('cpf').value.trim(),
-      condicoes: condicoes,
-      medicamentos: medicamentos,
-      vacinas: vacinas
-    };
-
-    const pessoas = carregarPessoas();
-    pessoas.push(pessoa);
-    salvarPessoas(pessoas);
-
-    this.reset();
-    atualizarQuadros();
-    atualizarVacinas();
-    atualizarTela();
-
-    msgSucesso.classList.add('mostrar');
-    msgSucesso.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  });
-
-  function alternarModoSelecao() {
-    modoSelecao = !modoSelecao;
-    selecionadas.clear();
-    document.getElementById('listaPessoas').classList.toggle('modo-selecao', modoSelecao);
-    document.getElementById('btnSelecionar').textContent = modoSelecao ? 'Cancelar' : 'Selecionar';
-    document.getElementById('btnExcluirSel').style.display = modoSelecao ? 'inline-block' : 'none';
-    atualizarTela();
-  }
-
-  function alternarSelecao(id) {
-    if (selecionadas.has(id)) selecionadas.delete(id);
-    else selecionadas.add(id);
-  }
-
-  function excluirSelecionadas() {
-    if (selecionadas.size === 0) {
-      alert('Nenhuma pessoa selecionada.');
-      return;
-    }
-    if (!confirm(`Excluir ${selecionadas.size} cadastro(s)? Essa ação não pode ser desfeita.`)) return;
-
-    let pessoas = carregarPessoas();
-    pessoas = pessoas.filter(p => !selecionadas.has(p.id));
-    salvarPessoas(pessoas);
-    selecionadas.clear();
-    alternarModoSelecao();
-  }
-
-  function excluirUma(id) {
-    if (!confirm('Excluir este cadastro?')) return;
-    let pessoas = carregarPessoas();
-    pessoas = pessoas.filter(p => p.id !== id);
-    salvarPessoas(pessoas);
-    atualizarTela();
-  }
-
-  function atualizarTela() {
-    const pessoas = carregarPessoas();
-    document.getElementById('contadorPessoas').textContent = pessoas.length;
-
-    const lista = document.getElementById('listaPessoas');
-    lista.classList.toggle('modo-selecao', modoSelecao);
-
-    if (pessoas.length === 0) {
-      lista.innerHTML = '<div class="vazio">Nenhuma pessoa cadastrada ainda.</div>';
-      return;
-    }
-
-    lista.innerHTML = pessoas.map(p => {
-      const idade = calcularIdade(p.nascimento);
-      const tags = (p.condicoes || []).map(c => {
-        const nomes = { diabetico: 'Diabético', hipertenso: 'Hipertenso', acamado: 'Acamado' };
-        return `<span class="tag tag-${c}">${nomes[c] || c}</span>`;
-      }).join('');
-
-      return `
-        <div class="card pessoa-card" style="margin-bottom:12px;">
-          <input type="checkbox" class="checkbox-sel" onchange="alternarSelecao('${p.id}')" ${selecionadas.has(p.id) ? 'checked' : ''}>
-          <div class="pessoa-info" style="flex:1;">
-            <b>${p.nome}</b>
-            <div class="pessoa-meta">${formatarData(p.nascimento)} ${idade !== null ? `(${idade} anos)` : ''} · CPF: ${p.cpf || '—'}</div>
-            <div class="tags">${tags}</div>
-            ${p.medicamentos && p.medicamentos.length ? `<div class="pessoa-meta" style="font-weight:500; margin-top:6px;">💊 ${p.medicamentos.join(', ')}</div>` : ''}
-            ${p.vacinas && p.vacinas.length ? `<div class="pessoa-meta" style="font-weight:500; margin-top:4px;">💉 ${p.vacinas.join(', ')}</div>` : ''}
-          </div>
-          ${!modoSelecao ? `<button class="btn-excluir-um" onclick="excluirUma('${p.id}')">Excluir</button>` : ''}
-        </div>
-      `;
-    }).join('');
-  }
-
-  atualizarTela();
-</script>
+</body>
+</html>
 
 </body>
 </html>
