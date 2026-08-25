@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cadsaude-cache-v24';
+const CACHE_NAME = 'cadsaude-cache-v25';
 const FILES_TO_CACHE = [
   './index.html',
   './cadastros.html',
