@@ -1,3 +1,5 @@
+Estrutura cadastro HTML
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -193,14 +195,6 @@
       width: 100%;
     }
 
-    .btn-cancelar-edicao {
-      background: #78909C;
-      color: #fff;
-      width: 100%;
-      margin-top: 8px;
-      display: none;
-    }
-
     .mensagem-sucesso {
       display: none;
       background: #E8F5E9;
@@ -312,30 +306,13 @@
       display: block;
     }
 
-    .acoes-card {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      align-items: flex-end;
-    }
-
-    .btn-acao {
+    .btn-excluir-um {
       background: none;
       border: none;
+      color: #C62828;
       font-weight: 700;
       font-size: 13px;
       cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 6px;
-    }
-
-    .btn-editar {
-      background: #E3F2FD;
-      color: #1565C0;
-    }
-
-    .btn-excluir-um {
-      color: #C62828;
     }
 
     .vazio {
@@ -349,12 +326,10 @@
 <body>
 
 <a href="index.html" class="voltar">← Voltar ao Painel</a>
-<h1 id="tituloForm">👤 Cadastro de Usuários</h1>
+<h1>👤 Cadastro de Usuários</h1>
 
 <div class="card">
   <form id="formCadastro">
-    <input type="hidden" id="editandoId" value="">
-
     <label>Nome completo</label>
     <input type="text" id="nome" required>
 
@@ -409,8 +384,7 @@
       <div class="vacinas-grid" id="vacinasGrid"></div>
     </div>
 
-    <button type="submit" class="btn btn-salvar" id="btnSalvarTexto">💾 Salvar cadastro</button>
-    <button type="button" class="btn btn-cancelar-edicao" id="btnCancelarEdicao" onclick="cancelarEdicao()">Cancelar Edição</button>
+    <button type="submit" class="btn btn-salvar">💾 Salvar cadastro</button>
 
     <div class="mensagem-sucesso" id="msgSucesso">✅ Cadastro salvo com sucesso!</div>
     <div class="mensagem-erro" id="msgErro">❌ Preencha nome e data de nascimento corretamente.</div>
@@ -567,114 +541,29 @@
       vacinas.push(chk.value);
     });
 
-    let pessoas = carregarPessoas();
-    const editandoId = document.getElementById('editandoId').value;
+    const pessoa = {
+      id: gerarId(),
+      nome: nome,
+      sexo: document.getElementById('sexo').value,
+      nascimento: nascimento,
+      cpf: document.getElementById('cpf').value.trim(),
+      condicoes: condicoes,
+      medicamentos: medicamentos,
+      vacinas: vacinas
+    };
 
-    if (editandoId) {
-      // Atualiza registro existente
-      pessoas = pessoas.map(p => {
-        if (p.id === editandoId) {
-          return {
-            ...p,
-            nome: nome,
-            sexo: document.getElementById('sexo').value,
-            nascimento: nascimento,
-            cpf: document.getElementById('cpf').value.trim(),
-            condicoes: condicoes,
-            medicamentos: medicamentos,
-            vacinas: vacinas
-          };
-        }
-        return p;
-      });
-      msgSucesso.textContent = '✅ Cadastro atualizado com sucesso!';
-    } else {
-      // Cria novo registro
-      const pessoa = {
-        id: gerarId(),
-        nome: nome,
-        sexo: document.getElementById('sexo').value,
-        nascimento: nascimento,
-        cpf: document.getElementById('cpf').value.trim(),
-        condicoes: condicoes,
-        medicamentos: medicamentos,
-        vacinas: vacinas
-      };
-      pessoas.push(pessoa);
-      msgSucesso.textContent = '✅ Cadastro salvo com sucesso!';
-    }
-
+    const pessoas = carregarPessoas();
+    pessoas.push(pessoa);
     salvarPessoas(pessoas);
-    cancelarEdicao();
+
+    this.reset();
+    atualizarQuadros();
+    atualizarVacinas();
     atualizarTela();
 
     msgSucesso.classList.add('mostrar');
     msgSucesso.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
-
-  function carregarParaEdicao(id) {
-    const pessoas = carregarPessoas();
-    const p = pessoas.find(item => item.id === id);
-    if (!p) return;
-
-    document.getElementById('editandoId').value = p.id;
-    document.getElementById('nome').value = p.nome || '';
-    document.getElementById('sexo').value = p.sexo || 'Masculino';
-
-    if (p.nascimento) {
-      const [ano, mes, dia] = p.nascimento.split('-');
-      document.getElementById('anoNasc').value = ano;
-      document.getElementById('mesNasc').value = parseInt(mes, 10);
-      document.getElementById('diaNasc').value = parseInt(dia, 10);
-    }
-
-    document.getElementById('cpf').value = p.cpf || '';
-
-    document.getElementById('chkDiabetico').checked = p.condicoes && p.condicoes.includes('diabetico');
-    document.getElementById('chkHipertenso').checked = p.condicoes && p.condicoes.includes('hipertenso');
-    document.getElementById('chkAcamado').checked = p.condicoes && p.condicoes.includes('acamado');
-
-    atualizarQuadros();
-    atualizarVacinas();
-
-    // Marcar medicamentos salvos
-    const medsPadrao = ['Captopril', 'Anlodipino 5mg', 'Anlodipino 10mg', 'Losartana', 'Hidroclorotiazida 25mg', 'AAS', 'Metformina 500mg', 'Metformina 850mg', 'Glibenclamida 5mg'];
-    const outrosArr = [];
-    
-    if (p.medicamentos) {
-      document.querySelectorAll('.quadro-medicamentos input[type="checkbox"]').forEach(chk => {
-        chk.checked = p.medicamentos.includes(chk.value);
-      });
-      p.medicamentos.forEach(m => {
-        if (!medsPadrao.includes(m)) outrosArr.push(m);
-      });
-    }
-    document.getElementById('outrosMedicamentos').value = outrosArr.join(', ');
-
-    // Marcar vacinas salvas
-    if (p.vacinas) {
-      document.querySelectorAll('#vacinasGrid input[type="checkbox"]').forEach(chk => {
-        chk.checked = p.vacinas.includes(chk.value);
-      });
-    }
-
-    // Alterar visual do formulário para modo edição
-    document.getElementById('tituloForm').textContent = '✏️ Editar Cadastro';
-    document.getElementById('btnSalvarTexto').textContent = '💾 Salvar alterações';
-    document.getElementById('btnCancelarEdicao').style.display = 'block';
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function cancelarEdicao() {
-    document.getElementById('formCadastro').reset();
-    document.getElementById('editandoId').value = '';
-    document.getElementById('tituloForm').textContent = '👤 Cadastro de Usuários';
-    document.getElementById('btnSalvarTexto').textContent = '💾 Salvar cadastro';
-    document.getElementById('btnCancelarEdicao').style.display = 'none';
-    atualizarQuadros();
-    atualizarVacinas();
-  }
 
   function alternarModoSelecao() {
     modoSelecao = !modoSelecao;
@@ -699,4 +588,63 @@
 
     let pessoas = carregarPessoas();
     pessoas = pessoas.filter(p => !selecionadas.has(p.id));
-    salvarPessoas(pessoa
+    salvarPessoas(pessoas);
+    selecionadas.clear();
+    alternarModoSelecao();
+  }
+
+  function excluirUma(id) {
+    if (!confirm('Excluir este cadastro?')) return;
+    let pessoas = carregarPessoas();
+    pessoas = pessoas.filter(p => p.id !== id);
+    salvarPessoas(pessoas);
+    atualizarTela();
+  }
+
+  function atualizarTela() {
+    let pessoas = carregarPessoas();
+    
+    const campoBusca = document.getElementById('buscaPessoa');
+    if (campoBusca && campoBusca.value.trim() !== "") {
+      const termo = campoBusca.value.toLowerCase();
+      pessoas = pessoas.filter(p => p.nome && p.nome.toLowerCase().includes(termo));
+    }
+
+    document.getElementById('contadorPessoas').textContent = pessoas.length;
+
+    const lista = document.getElementById('listaPessoas');
+    lista.classList.toggle('modo-selecao', modoSelecao);
+
+    if (pessoas.length === 0) {
+      lista.innerHTML = '<div class="vazio">Nenhuma pessoa cadastrada ainda.</div>';
+      return;
+    }
+
+    lista.innerHTML = pessoas.map(p => {
+      const idade = calcularIdade(p.nascimento);
+      const tags = (p.condicoes || []).map(c => {
+        const nomes = { diabetico: 'Diabético', hipertenso: 'Hipertenso', acamado: 'Acamado' };
+        return `<span class="tag tag-${c}">${nomes[c] || c}</span>`;
+      }).join('');
+
+      return `
+        <div class="card pessoa-card" style="margin-bottom:12px;">
+          <input type="checkbox" class="checkbox-sel" onchange="alternarSelecao('${p.id}')" ${selecionadas.has(p.id) ? 'checked' : ''}>
+          <div class="pessoa-info" style="flex:1;">
+            <b>${p.nome}</b>
+            <div class="pessoa-meta">${formatarData(p.nascimento)} ${idade !== null ? `(${idade} anos)` : ''} · CPF: ${p.cpf || '—'}</div>
+            <div class="tags">${tags}</div>
+            ${p.medicamentos && p.medicamentos.length ? `<div class="pessoa-meta" style="font-weight:500; margin-top:6px;">💊 ${p.medicamentos.join(', ')}</div>` : ''}
+            ${p.vacinas && p.vacinas.length ? `<div class="pessoa-meta" style="font-weight:500; margin-top:4px;">💉 ${p.vacinas.join(', ')}</div>` : ''}
+          </div>
+          ${!modoSelecao ? `<button class="btn-excluir-uma" onclick="excluirUma('${p.id}')">Excluir</button>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  atualizarTela();
+</script>
+
+</body>
+</html>
