@@ -1,4 +1,5 @@
-// Limpa caches antigos e força a atualização
+const CACHE_NAME = 'meu-site-v2';
+
 self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
@@ -6,7 +7,13 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
-      return Promise.all(keys.map((key) => caches.delete(key)));
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key); // Apaga apenas os caches antigos
+          }
+        })
+      );
     }).then(() => {
       return self.clients.claim();
     })
