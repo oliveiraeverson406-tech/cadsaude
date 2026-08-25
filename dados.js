@@ -6,7 +6,17 @@ function carregarPessoas() {
   const dados = localStorage.getItem(CHAVE_STORAGE);
   if (!dados) return [];
   try {
-    return JSON.parse(dados);
+    let pessoas = JSON.parse(dados);
+    if (!Array.isArray(pessoas)) return [];
+
+    // 👉 ORDENAÇÃO EM ORDEM ALFABÉTICA (A a Z) PELO NOME
+    pessoas.sort((a, b) => {
+      const nomeA = (a.nome || "").toLowerCase();
+      const nomeB = (b.nome || "").toLowerCase();
+      return nomeA.localeCompare(nomeB);
+    });
+
+    return pessoas;
   } catch (e) {
     return [];
   }
