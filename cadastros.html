@@ -601,23 +601,47 @@
   }
 
   function atualizarTela() {
-    const pessoas = carregarPessoas();
-    document.getElementById('contadorPessoas').textContent = pessoas.length;
+  let pessoas = carregarPessoas();
+  
+  const campoBusca = document.getElementById('buscaPessoa');
+  if (campoBusca && campoBusca.value.trim() !== "") {
+    const termo = campoBusca.value.toLowerCase();
+    pessoas = pessoas.filter(p => p.nome && p.nome.toLowerCase().includes(termo));
+  }
 
-    const lista = document.getElementById('listaPessoas');
-    lista.classList.toggle('modo-selecao', modoSelecao);
+  document.getElementById('contadorPessoas').textContent = pessoas.length;
 
-    if (pessoas.length === 0) {
-      lista.innerHTML = '<div class="vazio">Nenhuma pessoa cadastrada ainda.</div>';
-      return;
-    }
+  const lista = document.getElementById('listaPessoas');
+  lista.classList.toggle('modo-selecao', modoSelecao);
 
-    lista.innerHTML = pessoas.map(p => {
-      const idade = calcularIdade(p.nascimento);
-      const tags = (p.condicoes || []).map(c => {
-        const nomes = { diabetico: 'Diabético', hipertenso: 'Hipertenso', acamado: 'Acamado' };
-        return `<span class="tag tag-${c}">${nomes[c] || c}</span>`;
-      }).join('');
+  if (pessoas.length === 0) {
+    lista.innerHTML = '<div class="vazio">Nenhuma pessoa cadastrada ainda.</div>';
+    return;
+  }
+
+  lista.innerHTML = pessoas.map(p => {
+    const idade = calcularIdade(p.nascimento);
+    const tags = (p.condicoes || []).map(c => {
+      const nomes = { diabetico: 'Diabético', hipertenso: 'Hipertenso', acamado: 'Acamado' };
+      return `<span class="tag tag-${c}">${nomes[c] || c}</span>`;
+    }).join('');
+
+    return `
+      <div class="card pessoa-card" style="margin-bottom:12px;">
+        <input type="checkbox" class="checkbox-sel" onchange="alternarSelecao('${p.id}')" ${selecionadas.has(p.id) ? 'checked' : ''}>
+        <div class="pessoa-info" style="flex:1;">
+          <b>${p.nome}</b>
+          <div class="pessoa-meta">${formatarData(p.nascimento)} (${idade} anos)</div>
+          <div class="tags">${tags}</div>
+          ${p.medicamentos && p.medicamentos.length ? `<div style="font-size:12px; color:#555; margin-top:4px;"><b>Medicação:</b> ${p.medicamentos.join(', ')}</div>` : ''}
+          ${p.vacinas && p.vacinas.length ? `<div style="font-size:12px; color:#555; margin-top:2px;"><b>Vacinas:</b> ${p.vacinas.length} registradas</div>` : ''}
+        </div>
+        ${!modoSelecao ? `<button class="btn-excluir-uma" onclick="excluirUma('${p.id}')">Excluir</button>` : ''}
+      </div>
+    `;
+  }).join('');
+  }
+  
 
       return `
         <div class="card pessoa-card" style="margin-bottom:12px;">
