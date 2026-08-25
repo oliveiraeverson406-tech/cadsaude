@@ -1,4 +1,4 @@
-/* 📁 dados.js — lógica compartilhada do Painel de Saúde */
+/* 📁 dados.js — lógica compartilhada do Painel de Saúde (v5 Completo) */
 
 const CHAVE_STORAGE = 'cadastroPessoasSaude';
 
@@ -111,27 +111,29 @@ function importarBackup(event) {
   const leitor = new FileReader();
   leitor.onload = function (e) {
     try {
-      const dados = JSON.parse(e.target.result);
+      const conteudo = JSON.parse(e.target.result);
 
-      if (!dados.pessoas || !Array.isArray(dados.pessoas)) {
-        alert('❌ Arquivo inválido! Esse arquivo não é um backup de cadastro de pessoas.');
+      // Compatibilidade tanto para objetos estruturados quanto arrays diretos
+      const listaPessoas = Array.isArray(conteudo) ? conteudo : conteudo.pessoas;
+
+      if (!Array.isArray(listaPessoas)) {
+        alert('❌ Arquivo inválido! Esse arquivo não contém uma lista de cadastros reconhecida.');
         return;
       }
 
-      salvarPessoas(dados.pessoas);
+      salvarPessoas(listaPessoas);
 
-      const dataBackup = dados.geradoEm
-        ? new Date(dados.geradoEm).toLocaleString('pt-BR')
-        : 'não informada';
-      const totalBackup = dados.pessoas.length;
-
-      alert(`✅ Backup importado!\n\nData: ${dataBackup}\nTotal: ${totalBackup}`);
+      const totalBackup = listaPessoas.length;
+      alert(`✅ Backup importado com sucesso!\n\nTotal de cadastros carregados: ${totalBackup}`);
 
       if (typeof atualizarTela === 'function') {
         atualizarTela();
       }
+
     } catch (erro) {
-      alert('❌ Arquivo inválido!');
+      alert('❌ Erro ao ler o arquivo JSON. O arquivo pode estar corrompido.');
+    } finally {
+      event.target.value = '';
     }
   };
   leitor.readAsText(arquivo);
