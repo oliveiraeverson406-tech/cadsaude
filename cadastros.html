@@ -403,6 +403,7 @@
       <button class="btn-excluir-sel" id="btnExcluirSel" onclick="excluirSelecionadas()" style="display:none;">Excluir selecionadas</button>
     </div>
   </div>
+  <input type="text" id="buscaPessoa" placeholder="🔍 Buscar por nome..." style="margin-bottom:14px;">
   <div id="listaPessoas"></div>
 </div>
 
@@ -613,7 +614,23 @@
       return;
     }
 
-    lista.innerHTML = pessoas.map(p => {
+    const termoBusca = document.getElementById('buscaPessoa').value.trim().toLowerCase();
+
+    let pessoasFiltradas = pessoas;
+    if (termoBusca) {
+      pessoasFiltradas = pessoas.filter(p => p.nome.toLowerCase().includes(termoBusca));
+    }
+
+    pessoasFiltradas = [...pessoasFiltradas].sort((a, b) =>
+      a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
+    );
+
+    if (pessoasFiltradas.length === 0) {
+      lista.innerHTML = '<div class="vazio">Nenhuma pessoa encontrada com esse nome.</div>';
+      return;
+    }
+
+    lista.innerHTML = pessoasFiltradas.map(p => {
       const idade = calcularIdade(p.nascimento);
       const tags = (p.condicoes || []).map(c => {
         const nomes = { diabetico: 'Diabético', hipertenso: 'Hipertenso', acamado: 'Acamado' };
@@ -635,6 +652,8 @@
       `;
     }).join('');
   }
+
+  document.getElementById('buscaPessoa').addEventListener('input', atualizarTela);
 
   atualizarTela();
 </script>
