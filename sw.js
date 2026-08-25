@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cadsaude-cache-v23';
+const CACHE_NAME = 'cadsaude-cache-v24';
 const FILES_TO_CACHE = [
   './index.html',
   './cadastros.html',
@@ -30,6 +30,12 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Nunca intercepta navegação entre páginas (cliques em links) —
+  // deixa o navegador cuidar disso normalmente, sem risco de travar.
+  if (event.request.mode === 'navigate') {
+    return;
+  }
+
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
   );
