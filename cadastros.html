@@ -394,11 +394,17 @@
     <h2>Pessoas cadastradas (<span id="contadorPessoas">0</span>)</h2>
     <div>
       <button class="btn-selecionar" id="btnSelecionar" onclick="alternarModoSelecao()">Selecionar</button>
-      <button class="btn-excluir-sel" id="btnExcluirSel" onclick="excluirSelecionadas()" style="display:none;">Excluir selecionadas</button>
+      <button class="btn-excluir-sel" id="btnExcluirSel" onclick="excluirSelecionadas()" style="display:none;">Excluir</button>
     </div>
   </div>
+
+  <div class="campo-busca" style="margin-bottom: 12px;">
+    <input type="text" id="buscaPessoa" placeholder="🔍 Digite para buscar pelo nome..." oninput="atualizarTela()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+  </div>
+
   <div id="listaPessoas"></div>
 </div>
+  
 
 <script src="dados.js"></script>
 <script>
