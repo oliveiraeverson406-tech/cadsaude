@@ -540,20 +540,41 @@
       vacinas.push(chk.value);
     });
 
-    const pessoa = {
-      id: gerarId(),
-      nome: nome,
-      sexo: document.getElementById('sexo').value,
-      nascimento: nascimento,
-      cpf: document.getElementById('cpf').value.trim(),
-      condicoes: condicoes,
-      medicamentos: medicamentos,
-      vacinas: vacinas
-    };
+        const pessoas = carregarPessoas();
+    const form = document.getElementById('formCadastro');
+    const idEditando = form.dataset.editandoId;
 
-    const pessoas = carregarPessoas();
-    pessoas.push(pessoa);
+    if (idEditando) {
+      const index = pessoas.findIndex(p => p.id === idEditando);
+      if (index !== -1) {
+        pessoas[index] = {
+          ...pessoas[index],
+          nome: nome,
+          sexo: document.getElementById('sexo').value,
+          nascimento: nascimento,
+          cpf: document.getElementById('cpf').value.trim(),
+          condicoes: condicoes,
+          medicamentos: medicamentos,
+          vacinas: vacinas
+        };
+      }
+      delete form.dataset.editandoId;
+    } else {
+      const pessoa = {
+        id: gerarId(),
+        nome: nome,
+        sexo: document.getElementById('sexo').value,
+        nascimento: nascimento,
+        cpf: document.getElementById('cpf').value.trim(),
+        condicoes: condicoes,
+        medicamentos: medicamentos,
+        vacinas: vacinas
+      };
+      pessoas.push(pessoa);
+    }
+
     salvarPessoas(pessoas);
+    
 
     this.reset();
     atualizarQuadros();
