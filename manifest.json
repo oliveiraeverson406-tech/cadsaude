@@ -1,7 +1,7 @@
 {
   "name": "Cadastro de Pessoas - CadSaúde",
   "short_name": "CadSaúde",
-  "description": "Cadastro de nome, sexo, data de nascimento e CPF.",
+  "description": "Cadastro de nome, sexo, data de nascimento e CPF, com controle de vacinas e categorias de saúde",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f7f2f1",
@@ -9,9 +9,15 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "ícone.svg",
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
