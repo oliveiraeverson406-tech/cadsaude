@@ -138,3 +138,22 @@ function importarBackup(event) {
   };
   leitor.readAsText(arquivo);
 }
+function iniciarEdicao(id) {
+  const pessoas = carregarPessoas();
+  const pessoa = pessoas.find(p => p.id === id);
+  if (!pessoa) return;
+
+  // Preenche os campos do formulário com os dados salvos para você corrigir
+  if (document.getElementById('nome')) document.getElementById('nome').value = pessoa.nome || '';
+  if (document.getElementById('sexo')) document.getElementById('sexo').value = pessoa.sexo || '';
+  if (document.getElementById('nascimento')) document.getElementById('nascimento').value = pessoa.nascimento || '';
+  if (document.getElementById('cpf')) document.getElementById('cpf').value = pessoa.cpf || '';
+
+  // Marca que estamos editando essa pessoa específica (salvando o ID no formulário)
+  const form = document.querySelector('form');
+  if (form) form.dataset.editandoId = id;
+
+  // Sobe a tela para o formulário preenchido
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
