@@ -304,7 +304,7 @@
       display: block;
     }
 
-    .btn-excluir-uma {
+    .btn-excluir-um {
       background: none;
       border: none;
       color: #C62828;
@@ -357,12 +357,12 @@
 
     <div class="quadro-medicamentos quadro-hipertensao" id="quadroHipertensao">
       <h3>💊 Medicamentos — Hipertensão</h3>
-      <label class="med-item"><input type="checkbox" value="Captopril 25mg"> Captopril 25 mg</label>
+      <label class="med-item"><input type="checkbox" value="Captopril"> Captopril</label>
       <label class="med-item"><input type="checkbox" value="Anlodipino 5mg"> Anlodipino 5 mg</label>
       <label class="med-item"><input type="checkbox" value="Anlodipino 10mg"> Anlodipino 10 mg</label>
-      <label class="med-item"><input type="checkbox" value="Losartana 50mg"> Losartana 50 mg</label>
+      <label class="med-item"><input type="checkbox" value="Losartana"> Losartana</label>
       <label class="med-item"><input type="checkbox" value="Hidroclorotiazida 25mg"> Hidroclorotiazida 25 mg</label>
-      <label class="med-item"><input type="checkbox" value="AAS100mg"> AAS 100mg</label>
+      <label class="med-item"><input type="checkbox" value="AAS"> AAS</label>
     </div>
 
     <div class="quadro-medicamentos quadro-diabetes" id="quadroDiabetes">
@@ -496,64 +496,6 @@
     document.getElementById('quadroHipertensao').classList.toggle('ativo', document.getElementById('chkHipertenso').checked);
   }
 
-  function iniciarEdicao(id) {
-    const pessoas = carregarPessoas();
-    const pessoa = pessoas.find(p => p.id === id);
-    if (!pessoa) return;
-
-    document.getElementById('nome').value = pessoa.nome || '';
-    document.getElementById('sexo').value = pessoa.sexo || 'Masculino';
-    
-    if (pessoa.nascimento) {
-      const partes = pessoa.nascimento.split('-');
-      if (partes.length === 3) {
-        document.getElementById('anoNasc').value = partes[0];
-        document.getElementById('mesNasc').value = partes[1];
-        document.getElementById('diaNasc').value = partes[2];
-      }
-    }
-
-    document.getElementById('cpf').value = pessoa.cpf || '';
-
-    const condicoes = pessoa.condicoes || [];
-    document.getElementById('chkDiabetico').checked = condicoes.includes('diabetico');
-    document.getElementById('chkHipertenso').checked = condicoes.includes('hipertenso');
-    document.getElementById('chkAcamado').checked = condicoes.includes('acamado');
-
-    atualizarQuadros();
-    atualizarVacinas();
-
-    const medsFixos = [
-      'Captopril 25mg', 'Anlodipino 5mg', 'Anlodipino 10mg', 'Losartana 50mg',
-      'Hidroclorotiazida 25mg', 'AAS100mg', 'Metformina 500mg', 'Metformina 850mg', 'Glibenclamida 5mg'
-    ];
-
-    const outrosMeds = [];
-    if (pessoa.medicamentos) {
-      pessoa.medicamentos.forEach(m => {
-        const chk = Array.from(document.querySelectorAll('.quadro-medicamentos input[type="checkbox"]')).find(c => c.value === m);
-        if (chk) {
-          chk.checked = true;
-        } else {
-          outrosMeds.push(m);
-        }
-      });
-    }
-    document.getElementById('outrosMedicamentos').value = outrosMeds.join(', ');
-
-    if (pessoa.vacinas) {
-      setTimeout(() => {
-        pessoa.vacinas.forEach(v => {
-          const chkV = Array.from(document.querySelectorAll('#vacinasGrid input[type="checkbox"]')).find(c => c.value === v);
-          if (chkV) chkV.checked = true;
-        });
-      }, 100);
-    }
-
-    document.getElementById('formCadastro').dataset.editandoId = id;
-    document.getElementById('formCadastro').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
   document.getElementById('formCadastro').addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -597,39 +539,19 @@
       vacinas.push(chk.value);
     });
 
+    const pessoa = {
+      id: gerarId(),
+      nome: nome,
+      sexo: document.getElementById('sexo').value,
+      nascimento: nascimento,
+      cpf: document.getElementById('cpf').value.trim(),
+      condicoes: condicoes,
+      medicamentos: medicamentos,
+      vacinas: vacinas
+    };
+
     const pessoas = carregarPessoas();
-    const form = document.getElementById('formCadastro');
-    const idEditando = form.dataset.editandoId;
-
-    if (idEditando) {
-      const index = pessoas.findIndex(p => p.id === idEditando);
-      if (index !== -1) {
-        pessoas[index] = {
-          ...pessoas[index],
-          nome: nome,
-          sexo: document.getElementById('sexo').value,
-          nascimento: nascimento,
-          cpf: document.getElementById('cpf').value.trim(),
-          condicoes: condicoes,
-          medicamentos: medicamentos,
-          vacinas: vacinas
-        };
-      }
-      delete form.dataset.editandoId;
-    } else {
-      const pessoa = {
-        id: gerarId(),
-        nome: nome,
-        sexo: document.getElementById('sexo').value,
-        nascimento: nascimento,
-        cpf: document.getElementById('cpf').value.trim(),
-        condicoes: condicoes,
-        medicamentos: medicamentos,
-        vacinas: vacinas
-      };
-      pessoas.push(pessoa);
-    }
-
+    pessoas.push(pessoa);
     salvarPessoas(pessoas);
 
     this.reset();
@@ -699,4 +621,28 @@
     lista.innerHTML = pessoas.map(p => {
       const idade = calcularIdade(p.nascimento);
       const tags = (p.condicoes || []).map(c => {
-        const nomes = { diabetico: 'Diabético', hipertenso: 'Hipertenso', acamado: 'Acamado' 
+        const nomes = { diabetico: 'Diabético', hipertenso: 'Hipertenso', acamado: 'Acamado' };
+        return `<span class="tag tag-${c}">${nomes[c] || c}</span>`;
+      }).join('');
+
+      return `
+        <div class="card pessoa-card" style="margin-bottom:12px;">
+          <input type="checkbox" class="checkbox-sel" onchange="alternarSelecao('${p.id}')" ${selecionadas.has(p.id) ? 'checked' : ''}>
+          <div class="pessoa-info" style="flex:1;">
+            <b>${p.nome}</b>
+            <div class="pessoa-meta">${formatarData(p.nascimento)} ${idade !== null ? `(${idade} anos)` : ''} · CPF: ${p.cpf || '—'}</div>
+            <div class="tags">${tags}</div>
+            ${p.medicamentos && p.medicamentos.length ? `<div class="pessoa-meta" style="font-weight:500; margin-top:6px;">💊 ${p.medicamentos.join(', ')}</div>` : ''}
+            ${p.vacinas && p.vacinas.length ? `<div class="pessoa-meta" style="font-weight:500; margin-top:4px;">💉 ${p.vacinas.join(', ')}</div>` : ''}
+          </div>
+          ${!modoSelecao ? `<button class="btn-excluir-uma" onclick="excluirUma('${p.id}')">Excluir</button>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  atualizarTela();
+</script>
+
+</body>
+</html>
