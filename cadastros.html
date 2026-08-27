@@ -346,7 +346,8 @@
     <div class="ajuda">Exemplo: 22 / 04 / 1985</div>
 
     <label>CPF</label>
-    <input type="text" id="cpf" placeholder="000.000.000-00">
+    <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric">
+    <div class="ajuda" id="ajudaCpf"></div>
 
     <label>Condições de saúde</label>
     <div class="condicoes">
@@ -382,7 +383,8 @@
       <div class="vacinas-grid" id="vacinasGrid"></div>
     </div>
 
-    <button type="submit" class="btn btn-salvar">💾 Salvar cadastro</button>
+    <button type="submit" class="btn btn-salvar" id="btnSalvar">💾 Salvar cadastro</button>
+    <button type="button" class="btn" id="btnCancelarEdicao" onclick="cancelarEdicao()" style="display:none; width:100%; background:#ECEFF1; color:#37474F; margin-top:8px;">Cancelar edição</button>
 
     <div class="mensagem-sucesso" id="msgSucesso">✅ Cadastro salvo com sucesso!</div>
     <div class="mensagem-erro" id="msgErro">❌ Preencha nome e data de nascimento corretamente.</div>
@@ -409,6 +411,7 @@
 <script>
   let modoSelecao = false;
   let selecionadas = new Set();
+  let idEmEdicao = null;
 
   const VACINAS_POR_FAIXA = {
     crianca: {
@@ -496,6 +499,36 @@
     document.getElementById('quadroHipertensao').classList.toggle('ativo', document.getElementById('chkHipertenso').checked);
   }
 
+  // ===== Máscara e validação de CPF =====
+  function mascararCPF(valor) {
+    valor = valor.replace(/\D/g, '');
+    valor = valor.slice(0, 11);
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    return valor;
+  }
+
+  function cpfValido(valor) {
+    const numeros = valor.replace(/\D/g, '');
+    return numeros.length === 0 || numeros.length === 11;
+  }
+
+  const campoCpf = document.getElementById('cpf');
+  const ajudaCpf = document.getElementById('ajudaCpf');
+
+  campoCpf.addEventListener('input', function (e) {
+    e.target.value = mascararCPF(e.target.value);
+    const numeros = e.target.value.replace(/\D/g, '');
+    if (numeros.length > 0 && numeros.length < 11) {
+      ajudaCpf.textContent = `Faltam ${11 - numeros.length} número(s).`;
+      ajudaCpf.style.color = '#C62828';
+    } else {
+      ajudaCpf.textContent = '';
+    }
+  });
+  // ===== Fim máscara CPF =====
+
   document.getElementById('formCadastro').addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -508,8 +541,17 @@
     const dia = document.getElementById('diaNasc').value;
     const mes = document.getElementById('mesNasc').value;
     const ano = document.getElementById('anoNasc').value;
+    const cpfDigitado = campoCpf.value.trim();
 
     if (!nome || !dia || !mes || !ano) {
+      msgErro.textContent = '❌ Preencha nome e data de nascimento corretamente.';
+      msgErro.classList.add('mostrar');
+      msgErro.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    if (!cpfValido(cpfDigitado)) {
+      msgErro.textContent = '❌ CPF incompleto. Digite os 11 números.';
       msgErro.classList.add('mostrar');
       msgErro.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
@@ -539,29 +581,87 @@
       vacinas.push(chk.value);
     });
 
-    const pessoa = {
-      id: gerarId(),
+    const dadosPessoa = {
       nome: nome,
       sexo: document.getElementById('sexo').value,
       nascimento: nascimento,
-      cpf: document.getElementById('cpf').value.trim(),
+      cpf: cpfDigitado,
       condicoes: condicoes,
       medicamentos: medicamentos,
       vacinas: vacinas
     };
 
-    const pessoas = carregarPessoas();
-    pessoas.push(pessoa);
-    salvarPessoas(pessoas);
+    let pessoas = carregarPessoas();
 
+    if (idEmEdicao) {
+      pessoas = pessoas.map(p => p.id === idEmEdicao ? { id: idEmEdicao, ...dadosPessoa } : p);
+      msgSucesso.textContent = '✅ Cadastro atualizado com sucesso!';
+    } else {
+      pessoas.push({ id: gerarId(), ...dadosPessoa });
+      msgSucesso.textContent = '✅ Cadastro salvo com sucesso!';
+    }
+
+    salvarPessoas(pessoas);
+    cancelarEdicao();
     this.reset();
     atualizarQuadros();
     atualizarVacinas();
+    ajudaCpf.textContent = '';
     atualizarTela();
 
     msgSucesso.classList.add('mostrar');
     msgSucesso.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
+
+  function editarPessoa(id) {
+    const pessoas = carregarPessoas();
+    const p = pessoas.find(x => x.id === id);
+    if (!p) return;
+
+    idEmEdicao = id;
+
+    document.getElementById('nome').value = p.nome || '';
+    document.getElementById('sexo').value = p.sexo || 'Masculino';
+
+    if (p.nascimento) {
+      const [ano, mes, dia] = p.nascimento.split('-');
+      document.getElementById('anoNasc').value = ano;
+      document.getElementById('mesNasc').value = mes;
+      document.getElementById('diaNasc').value = dia;
+    }
+
+    campoCpf.value = mascararCPF(p.cpf || '');
+    ajudaCpf.textContent = '';
+
+    document.getElementById('chkDiabetico').checked = (p.condicoes || []).includes('diabetico');
+    document.getElementById('chkHipertenso').checked = (p.condicoes || []).includes('hipertenso');
+    document.getElementById('chkAcamado').checked = (p.condicoes || []).includes('acamado');
+    atualizarQuadros();
+    atualizarVacinas();
+
+    const medsConhecidos = new Set();
+    document.querySelectorAll('.quadro-medicamentos input[type="checkbox"]').forEach(chk => {
+      chk.checked = (p.medicamentos || []).includes(chk.value);
+      if (chk.checked) medsConhecidos.add(chk.value);
+    });
+    const outros = (p.medicamentos || []).filter(m => !medsConhecidos.has(m));
+    document.getElementById('outrosMedicamentos').value = outros.join(', ');
+
+    document.querySelectorAll('#vacinasGrid input[type="checkbox"]').forEach(chk => {
+      chk.checked = (p.vacinas || []).includes(chk.value);
+    });
+
+    document.getElementById('btnSalvar').textContent = '💾 Salvar alteração';
+    document.getElementById('btnCancelarEdicao').style.display = 'block';
+
+    document.getElementById('formCadastro').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function cancelarEdicao() {
+    idEmEdicao = null;
+    document.getElementById('btnSalvar').textContent = '💾 Salvar cadastro';
+    document.getElementById('btnCancelarEdicao').style.display = 'none';
+  }
 
   function alternarModoSelecao() {
     modoSelecao = !modoSelecao;
@@ -635,7 +735,12 @@
             ${p.medicamentos && p.medicamentos.length ? `<div class="pessoa-meta" style="font-weight:500; margin-top:6px;">💊 ${p.medicamentos.join(', ')}</div>` : ''}
             ${p.vacinas && p.vacinas.length ? `<div class="pessoa-meta" style="font-weight:500; margin-top:4px;">💉 ${p.vacinas.join(', ')}</div>` : ''}
           </div>
-          ${!modoSelecao ? `<button class="btn-excluir-uma" onclick="excluirUma('${p.id}')">Excluir</button>` : ''}
+          ${!modoSelecao ? `
+            <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+              <button class="btn-excluir-um" onclick="editarPessoa('${p.id}')" style="color:#1565C0;">✏️ Editar</button>
+              <button class="btn-excluir-um" onclick="excluirUma('${p.id}')">Excluir</button>
+            </div>
+          ` : ''}
         </div>
       `;
     }).join('');
