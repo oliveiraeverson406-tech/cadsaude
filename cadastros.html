@@ -637,6 +637,7 @@
     if (outros) {
       outros.split(',').forEach(m => medicamentos.push(m.trim()));
     }
+    medicamentos.sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
     const vacinas = [];
     document.querySelectorAll('#vacinasGrid input[type="checkbox"]:checked').forEach(chk => {
