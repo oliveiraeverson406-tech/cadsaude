@@ -1,6 +1,57 @@
-/* 📁 dados.js — lógica compartilhada do Painel de Saúde (v5 Completo) */
+/* 📁 dados.js — lógica compartilhada do Painel de Saúde (agora com Firestore + offline) */
 
 const CHAVE_STORAGE = 'cadastroPessoasSaude';
+
+// ===================== FIREBASE / FIRESTORE =====================
+// 👉 COLE AQUI a configuração do projeto Firebase "cadsaude-2026"
+const firebaseConfig = {
+  apiKey: "AIzaSyBJaSr0FcBpLQ6YC_NjEMivnuxytD612Fs",
+  authDomain: "cadsaude-2026.firebaseapp.com",
+  projectId: "cadsaude-2026",
+  storageBucket: "cadsaude-2026.firebasestorage.app",
+  messagingSenderId: "136322000265",
+  appId: "1:136322000265:web:897cbb6d685c2eed512d58"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+// persistência offline: guarda cache local e sincroniza quando a internet voltar
+db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+
+const DOC_REF = db.collection('cadsaude').doc('pessoas');
+
+let _callbackAtualizacao = null;
+
+// Páginas chamam isso pra saber quando os dados da nuvem chegaram/mudaram
+function aoAtualizarDados(callback) {
+  _callbackAtualizacao = callback;
+}
+
+function iniciarSincronizacao() {
+  DOC_REF.onSnapshot((snap) => {
+    if (snap.exists) {
+      const dados = snap.data();
+      const lista = Array.isArray(dados.pessoas) ? dados.pessoas : [];
+      localStorage.setItem(CHAVE_STORAGE, JSON.stringify(lista));
+    } else {
+      // documento ainda não existe na nuvem: sobe o que já tiver salvo localmente (se tiver)
+      const atual = carregarPessoas();
+      if (atual.length > 0) {
+        DOC_REF.set({ pessoas: atual }).catch(() => {});
+      }
+    }
+    if (typeof _callbackAtualizacao === 'function') {
+      _callbackAtualizacao();
+    }
+  }, () => {
+    // erro de conexão: continua funcionando com o que estiver no cache local
+    if (typeof _callbackAtualizacao === 'function') {
+      _callbackAtualizacao();
+    }
+  });
+}
+iniciarSincronizacao();
+// ===================== FIM FIREBASE =====================
 
 function carregarPessoas() {
   const dados = localStorage.getItem(CHAVE_STORAGE);
@@ -24,6 +75,10 @@ function carregarPessoas() {
 
 function salvarPessoas(pessoas) {
   localStorage.setItem(CHAVE_STORAGE, JSON.stringify(pessoas));
+  DOC_REF.set({ pessoas: pessoas }).catch(() => {
+    // se falhar (ex: sem internet), o Firestore guarda a escrita em fila
+    // e sincroniza sozinho quando a conexão voltar
+  });
 }
 
 function gerarId() {
@@ -138,6 +193,7 @@ function importarBackup(event) {
   };
   leitor.readAsText(arquivo);
 }
+
 function iniciarEdicao(id) {
   const pessoas = carregarPessoas();
   const pessoa = pessoas.find(p => p.id === id);
@@ -156,4 +212,3 @@ function iniciarEdicao(id) {
   // Sobe a tela para o formulário preenchido
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
